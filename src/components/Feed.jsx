@@ -10,7 +10,7 @@ function Feed() {
         // Função para buscar as frases no backend
         const fetchFrases = async () => {
             try {
-                const res = await axios.get("http://127.0.0.1:8000/frases");
+                const res = await axios.get("https://motiva-mais-3.onrender.com/frases");
                 setFrases(res.data.frases); // assume que o backend retorna { frases: [...] }
             } catch (error) {
                 console.error("Erro ao buscar frases:", error);
