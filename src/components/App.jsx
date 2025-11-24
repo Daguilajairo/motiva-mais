@@ -1,10 +1,12 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
 
 function App() {
   const [login, setLogin] = useState("");
   const [senha, setSenha] = useState("");
   const [erro, setErro] = useState("");
+  const navigate = useNavigate();
+
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -26,7 +28,7 @@ function App() {
         sessionStorage.setItem("token", result.token);
         alert("Login realizado com sucesso!");
         // Redirecionar para Feed
-        window.location.href = "/feed";
+       navigate("/feed");
       } else {
         setErro(result.msg || "Erro no login");
       }
