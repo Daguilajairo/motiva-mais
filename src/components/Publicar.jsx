@@ -1,10 +1,12 @@
 import { useState } from "react";
 import Menu from "./Menu.jsx";
+import { useNavigate } from "react-router-dom"; // <<< importar
 import axios from "axios";
 
 function Publicar() {
     const [texto, setTexto] = useState("");
     const [hashtags, setHashtags] = useState("");
+    const navigate = useNavigate(); // <<< usar
     
     const handlePublicar = async () => {
     try {
@@ -20,6 +22,7 @@ function Publicar() {
         alert(res.data.msg);
         setTexto("");
         setHashtags("");
+        navigate("/feed"); // <<< redirecionar para o feed
     } catch (error) {
         console.error(error);
         alert("Erro ao publicar a frase");
