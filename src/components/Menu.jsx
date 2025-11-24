@@ -12,8 +12,6 @@ function Header() {
                 <h1 style={{ fontFamily: "Dancing Script" }} className="font-bold text-4xl text-purple-500">
                     Motiva+
                 </h1>
-
-                
                 <img
                     className="w-8 h-8 hover:scale-110 cursor-pointer"
                     src="src/assets/img/icon-menu.png"

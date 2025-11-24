@@ -26,7 +26,9 @@ function App() {
       if (response.ok) {
         // Login OK, salvar token no sessionStorage
         sessionStorage.setItem("token", result.token);
-        alert("Login realizado com sucesso!");
+        ;
+        // SALVAR O NOME DO USUÁRIO NO LOCALSTORAGE
+    localStorage.setItem("usuario", JSON.stringify({ nome: login }));
         // Redirecionar para Feed
        navigate("/feed");
       } else {

@@ -5,20 +5,33 @@ import axios from "axios";
 
 function Feed() {
     const [frases, setFrases] = useState([]);
+    const [autorLogado, setAutorLogado] = useState(null);
     
     useEffect(() => {
-        // Função para buscar as frases no backend
-        const fetchFrases = async () => {
-            try {
-                const res = await axios.get("https://motiva-mais-3.onrender.com/frases");
-                setFrases(res.data.frases); // assume que o backend retorna { frases: [...] }
-            } catch (error) {
-                console.error("Erro ao buscar frases:", error);
-            }
-        }
+    const token = sessionStorage.getItem("token");
+    if (!token) {
+        window.location.href = "/"; // redireciona para login
+        return;
+    }
 
-        fetchFrases();
-    }, []);
+    // Criar uma função para encapsular toda a lógica
+    const carregarFeed = async () => {
+        // Pega o usuário do localStorage
+        const usuarioStr = localStorage.getItem("usuario");
+        const usuarioObj = usuarioStr ? JSON.parse(usuarioStr) : null;
+        setAutorLogado(usuarioObj);
+
+        try {
+            const res = await axios.get("https://motiva-mais-3.onrender.com/frases");
+            setFrases(res.data.frases);
+        } catch (error) {
+            console.error("Erro ao buscar frases:", error);
+        }
+    }
+
+    carregarFeed(); // chama a função
+}, []);
+
 
     return (
         <section className="bg-gradient-to-b from-blue-100 to-purple-100 h-screen w-full flex flex-col items-center">
@@ -38,7 +51,10 @@ function Feed() {
                         <div className="flex gap-2">
                             <img className="w-12 h-12 hover:scale-110 cursor-pointer" src="src/assets/img/icon-avatar.png" alt="avatar" />
                             <div>
-                                <h1 className="font-bold text-base">{frase.autor}</h1>
+                                <h1 className="font-bold text-base">
+                                    {frase.autor}
+                                    {autorLogado && frase.autor === autorLogado.nome ? " (Você)" : ""}
+                                </h1>
                                 <p className="text-sm text-stone-500">{new Date(frase.created_at).toLocaleString()}</p>
                             </div>
                         </div>

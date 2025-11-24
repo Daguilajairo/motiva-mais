@@ -7,20 +7,25 @@ function Publicar() {
     const [hashtags, setHashtags] = useState("");
     
     const handlePublicar = async () => {
-        try {
-            const res = await axios.post("http://127.0.0.1:8000/frases", {
-                texto: texto,
-                hashtags: hashtags.split(" "), // transforma em array
-                autor: "Jairo D'aguila" // futuramente será dinâmico pelo login
-            });
-            alert(res.data.msg);
-            setTexto("");
-            setHashtags("");
-        } catch (error) {
-            console.error(error);
-            alert("Erro ao publicar a frase");
-        }
+    try {
+        const usuario = JSON.parse(localStorage.getItem("usuario"));
+        const autor = usuario?.nome || "Anônimo";
+
+        const res = await axios.post("https://motiva-mais-3.onrender.com/frases", {
+            texto: texto,
+            hashtags: hashtags.split(" "), // transforma em array
+            autor: autor
+        });
+
+        alert(res.data.msg);
+        setTexto("");
+        setHashtags("");
+    } catch (error) {
+        console.error(error);
+        alert("Erro ao publicar a frase");
     }
+}
+
 
     return (
         <>
