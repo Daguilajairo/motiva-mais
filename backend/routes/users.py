@@ -5,7 +5,7 @@ from database import users_collection
 from jose import jwt
 from datetime import datetime, timedelta
 
-router = APIRouter()  # <---- isso estava faltando
+router = APIRouter()
 
 SECRET_KEY = "minha_chave_secreta"
 
@@ -36,5 +36,11 @@ def login(user: UserCreate):
         "user_id": str(usuario["_id"]),
         "exp": datetime.utcnow() + timedelta(hours=1)
     }
+    
     token = jwt.encode(payload, SECRET_KEY, algorithm="HS256")
+
+    # Garante que o token seja string (não bytes)
+    if isinstance(token, bytes):
+        token = token.decode("utf-8")
+
     return {"msg": "Login realizado com sucesso", "token": token}
