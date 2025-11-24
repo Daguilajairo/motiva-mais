@@ -20,7 +20,7 @@ function Cadastro() {
     const data = { nome, dataNascimento, senha };
 
     try {
-      const response = await fetch("https://motiva-backend.onrender.com/registrar", {
+      const response = await fetch("https://motiva-mais-3.onrender.com/registrar", {
 
         method: "POST",
         headers: { "Content-Type": "application/json" },
