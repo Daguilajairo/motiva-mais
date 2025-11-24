@@ -6,7 +6,7 @@ import Feed from './components/Feed.jsx'
 import Populares from './components/Populares.jsx'
 import Publicar from './components/Publicar.jsx'
 import Salvos from './components/Salvos.jsx'
-import Cadastro from './components/CAdastro.jsx'
+import Cadastro from './components/Cadastro.jsx'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
