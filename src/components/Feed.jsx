@@ -40,7 +40,6 @@ function Feed() {
   // Se houver nova frase publicada, adiciona no início do feed
   useEffect(() => {
     if (novaFrase) {
-      // Coloca dentro de setTimeout para evitar renderização síncrona
       const timeout = setTimeout(() => {
         setFrases(prev => [novaFrase, ...prev]);
       }, 0);
@@ -48,6 +47,33 @@ function Feed() {
       return () => clearTimeout(timeout);
     }
   }, [novaFrase]);
+
+  // Função para curtir
+  const handleCurtir = async (fraseId) => {
+    try {
+      await axios.post(`https://motiva-mais-3.onrender.com/frases/${fraseId}/curtir`);
+      setFrases(prev => prev.map(f => f._id === fraseId ? { ...f, curtidas: f.curtidas + 1 } : f));
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  // Função para salvar
+  const handleSalvar = async (fraseId) => {
+    try {
+      const usuario = autorLogado?.nome;
+      if (!usuario) return;
+
+      await axios.post(`https://motiva-mais-3.onrender.com/frases/${fraseId}/salvar`, { usuario });
+
+      setFrases(prev => prev.map(f => f._id === fraseId
+        ? { ...f, salvos: f.salvos?.includes(usuario) ? f.salvos.filter(u => u !== usuario) : [...(f.salvos || []), usuario] }
+        : f
+      ));
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   return (
     <section className="bg-gradient-to-b from-blue-100 to-purple-100 h-screen w-full flex flex-col items-center">
@@ -87,6 +113,23 @@ function Feed() {
               {frase.hashtags.map((tag, index) => (
                 <p key={index}>#{tag}</p>
               ))}
+            </div>
+
+            {/* Botões Curtir e Salvar */}
+            <div className="flex mt-4 gap-4 items-center">
+              <button
+                onClick={() => handleCurtir(frase._id)}
+                className="text-purple-500 font-bold"
+              >
+                👍 {frase.curtidas || 0}
+              </button>
+
+              <button
+                onClick={() => handleSalvar(frase._id)}
+                className={`text-purple-500 font-bold ${frase.salvos?.includes(autorLogado?.nome) ? "text-red-500" : ""}`}
+              >
+                💾
+              </button>
             </div>
 
             <Estado />

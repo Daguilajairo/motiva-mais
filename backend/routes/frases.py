@@ -19,17 +19,21 @@ def criar_frase(frase: Frase):
         "texto": frase.texto,
         "hashtags": frase.hashtags,
         "autor": frase.autor,
-        "created_at": datetime.utcnow()
+        "created_at": datetime.utcnow(),
+        "curtidas": 0,        # contador de curtidas
+        "salvos": []  
     }
     resultado = frases_collection.insert_one(nova_frase)
     return {
-    "msg": "Frase criada com sucesso",
+    
     "frase": {
         "_id": str(resultado.inserted_id),
         "texto": frase.texto,
         "hashtags": frase.hashtags,
         "autor": frase.autor,
-        "created_at": datetime.utcnow().isoformat()
+        "created_at": datetime.utcnow().isoformat(),
+        "curtidas": 0,
+        "salvos": []
     }
 }
 
@@ -47,3 +51,36 @@ def listar_frases():
             "created_at": f["created_at"].isoformat()
         })
     return {"frases": frases}
+
+# Curtir frase
+@router.post("/frases/{frase_id}/curtir")
+def curtir_frase(frase_id: str):
+    frase = frases_collection.find_one({"_id": ObjectId(frase_id)})
+    if not frase:
+        return {"msg": "Frase não encontrada"}
+    
+    frases_collection.update_one(
+        {"_id": ObjectId(frase_id)},
+        {"$inc": {"curtidas": 1}}
+    )
+    return {"msg": "Frase curtida com sucesso"}
+
+# Salvar frase
+@router.post("/frases/{frase_id}/salvar")
+def salvar_frase(frase_id: str, usuario: str):
+    frase = frases_collection.find_one({"_id": ObjectId(frase_id)})
+    if not frase:
+        return {"msg": "Frase não encontrada"}
+    
+    if usuario in frase.get("salvos", []):
+        frases_collection.update_one(
+            {"_id": ObjectId(frase_id)},
+            {"$pull": {"salvos": usuario}}
+        )
+        return {"msg": "Frase removida dos salvos"}
+    else:
+        frases_collection.update_one(
+            {"_id": ObjectId(frase_id)},
+            {"$push": {"salvos": usuario}}
+        )
+        return {"msg": "Frase salva com sucesso"}
