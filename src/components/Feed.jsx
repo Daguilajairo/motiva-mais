@@ -1,9 +1,13 @@
 import { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import Menu from "./Menu.jsx";
 import Estado from "./Estado.jsx";
 import axios from "axios";
 
-function Feed({ novaFrase }) {
+function Feed() {
+  const location = useLocation();
+  const { novaFrase } = location.state || {}; // Pega nova frase se houver
+
   const [frases, setFrases] = useState([]);
   const [autorLogado, setAutorLogado] = useState(null);
 
@@ -20,8 +24,6 @@ function Feed({ novaFrase }) {
         // Pega usuário do localStorage
         const usuarioStr = localStorage.getItem("usuario");
         const usuarioObj = usuarioStr ? JSON.parse(usuarioStr) : null;
-
-        // Atualiza estado dentro da função
         setAutorLogado(usuarioObj);
 
         // Busca frases
@@ -32,17 +34,19 @@ function Feed({ novaFrase }) {
       }
     };
 
-    carregarFeed(); // chama a função
+    carregarFeed();
   }, []);
 
   // Se houver nova frase publicada, adiciona no início do feed
   useEffect(() => {
     if (novaFrase) {
-        const atualizarFrases = () =>{
-      setFrases(prev => [novaFrase, ...prev]);
-    };
-    setTimeout(atualizarFrases, 0);
-}
+      // Coloca dentro de setTimeout para evitar renderização síncrona
+      const timeout = setTimeout(() => {
+        setFrases(prev => [novaFrase, ...prev]);
+      }, 0);
+
+      return () => clearTimeout(timeout);
+    }
   }, [novaFrase]);
 
   return (
@@ -61,7 +65,11 @@ function Feed({ novaFrase }) {
         frases.map((frase) => (
           <div key={frase._id} className="bg-zinc-50 w-85 h-auto mt-4 rounded-xl shadow-lg p-6 flex flex-col pt-4">
             <div className="flex gap-2">
-              <img className="w-12 h-12 hover:scale-110 cursor-pointer" src="src/assets/img/icon-avatar.png" alt="avatar" />
+              <img
+                className="w-12 h-12 hover:scale-110 cursor-pointer"
+                src="src/assets/img/icon-avatar.png"
+                alt="avatar"
+              />
               <div>
                 <h1 className="font-bold text-base">
                   {frase.autor}

@@ -23,9 +23,15 @@ def criar_frase(frase: Frase):
     }
     resultado = frases_collection.insert_one(nova_frase)
     return {
-        "msg": "Frase criada com sucesso",
-        "id": str(resultado.inserted_id)
+    "msg": "Frase criada com sucesso",
+    "frase": {
+        "_id": str(resultado.inserted_id),
+        "texto": frase.texto,
+        "hashtags": frase.hashtags,
+        "autor": frase.autor,
+        "created_at": datetime.utcnow().isoformat()
     }
+}
 
 # GET: listar frases
 @router.get("/frases")
