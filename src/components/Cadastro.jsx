@@ -53,7 +53,7 @@ function Cadastro() {
         "usuario",
         JSON.stringify({ nome: nomePerfil, login: login, foto: result.foto })
       );
-      navigate("/feed");
+      navigate("/");
       return;
     }
 
