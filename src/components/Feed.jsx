@@ -101,7 +101,7 @@ function Feed() {
             <div className="flex gap-2">
               <img
                 className="w-12 h-12 hover:scale-110 cursor-pointer"
-                src="src/assets/img/icon-avatar.png"
+                src="/img/icon-avatar.png"
                 alt="avatar"
               />
               <div>

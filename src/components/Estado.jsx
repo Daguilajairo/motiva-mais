@@ -8,8 +8,8 @@ function Estado({ frase, autorLogado, onCurtir, onSalvar }) {
           <img
             className="w-5 h-5 hover:scale-110"
             src={frase.curtidoPor?.includes(autorLogado?.nome)
-              ? "src/assets/img/icon-favorite-red.png"
-              : "src/assets/img/icon-favorite.png"
+              ? "/img/icon-favorite-red.png"
+              : "/img/icon-favorite.png"
             }
             alt="Curtir"
           />
@@ -21,8 +21,8 @@ function Estado({ frase, autorLogado, onCurtir, onSalvar }) {
           <img
             className="w-5 h-5 hover:scale-110"
             src={frase.salvos?.includes(autorLogado?.nome)
-              ? "src/assets/img/icon-save-yellow.png"
-              : "src/assets/img/icon-save-ligth.png"
+              ? "/img/icon-save-yellow.png"
+              : "/img/icon-save-ligth.png"
             }
             alt="Salvar"
           />
