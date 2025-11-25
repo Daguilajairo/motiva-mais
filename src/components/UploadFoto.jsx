@@ -10,7 +10,7 @@ function UploadFoto() {
   const [sucesso, setSucesso] = useState("");
   const navigate = useNavigate();
 
-  const handleFileChange = (e) => setFile(e.target.files[0]);
+  const BASE_URL = "https://motiva-mais-3.onrender.com";
 
   const handleUpload = async () => {
     if (!file) {
@@ -23,7 +23,7 @@ function UploadFoto() {
 
     try {
       const res = await axios.post(
-        `https://motiva-mais-3.onrender.com/usuarios/${usuario.nome}/upload-foto`,
+        `${BASE_URL}/usuarios/${usuario.nome}/upload-foto`,
         formData,
         { headers: { "Content-Type": "multipart/form-data" } }
       );
@@ -42,10 +42,10 @@ function UploadFoto() {
   return (
     <div className="bg-zinc-50 w-85 h-80 mt-10 rounded-xl shadow-lg p-6 flex flex-col items-center justify-center">
       <h2 className="text-2xl font-bold mb-4">Escolha sua foto de perfil</h2>
-      <input type="file" accept="image/*" onChange={handleFileChange} />
+      <input type="file" accept="image/*" onChange={(e) => setFile(e.target.files[0])} />
       <button
         onClick={handleUpload}
-        className="bg-gradient-to-l from-blue-600 to-purple-500 text-white rounded-md p-3 mt-4 hover:from-blue-700 hover:to-purple-600 transition-transform hover:scale-105"
+        className="bg-gradient-to-l from-blue-600 to-purple-500 text-white rounded-md p-3 mt-4 hover:scale-105 transition-transform"
       >
         Enviar Foto
       </button>

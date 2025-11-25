@@ -1,4 +1,3 @@
-# routes/users.py
 from fastapi import APIRouter, HTTPException, UploadFile, File, Form
 from fastapi.responses import JSONResponse
 from database import users_collection
@@ -17,6 +16,7 @@ BASE_URL = "https://motiva-mais-3.onrender.com"
 UPLOAD_DIR = "uploads"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
+
 # === Cadastro com foto opcional ===
 @router.post("/registrar")
 async def registrar(
@@ -24,7 +24,6 @@ async def registrar(
     senha: str = Form(...),
     file: UploadFile = File(None)  # foto opcional
 ):
-    # Verifica se usuário já existe
     if users_collection.find_one({"nome": nome}):
         raise HTTPException(status_code=400, detail="Usuário já existe")
 
@@ -35,7 +34,7 @@ async def registrar(
         caminho = os.path.join(UPLOAD_DIR, f"{nome}_{file.filename}")
         with open(caminho, "wb") as buffer:
             shutil.copyfileobj(file.file, buffer)
-        usuario_dict["foto"] = f"{BASE_URL}/{caminho}"
+        usuario_dict["foto"] = f"{BASE_URL}/uploads/{nome}_{file.filename}"
     else:
         # Foto padrão
         usuario_dict["foto"] = f"{BASE_URL}/img/icon-avatar.png"
@@ -47,6 +46,7 @@ async def registrar(
         "id": str(result.inserted_id),
         "foto": usuario_dict["foto"]
     }
+
 
 # === Login ===
 @router.post("/login")
@@ -68,18 +68,22 @@ def login(nome: str = Form(...), senha: str = Form(...)):
 
     return {"msg": "Login realizado com sucesso", "token": token, "foto": foto_url}
 
-# === Upload de foto ===
+
+# === Upload de foto de perfil (feed ou edição) ===
 @router.post("/usuarios/{usuario_nome}/upload-foto")
 async def upload_foto(usuario_nome: str, file: UploadFile = File(...)):
     if not file.content_type.startswith("image/"):
         raise HTTPException(status_code=400, detail="Arquivo precisa ser uma imagem")
 
+    # Salva a imagem no servidor
     caminho = os.path.join(UPLOAD_DIR, f"{usuario_nome}_{file.filename}")
     with open(caminho, "wb") as buffer:
         shutil.copyfileobj(file.file, buffer)
 
-    foto_url = f"{BASE_URL}/{caminho}"
+    # URL pública
+    foto_url = f"{BASE_URL}/uploads/{usuario_nome}_{file.filename}"
 
+    # Atualiza o usuário no MongoDB
     users_collection.update_one(
         {"nome": usuario_nome},
         {"$set": {"foto": foto_url}}
