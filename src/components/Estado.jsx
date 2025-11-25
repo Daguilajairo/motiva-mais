@@ -2,22 +2,21 @@ import React, { useState, useEffect } from "react";
 
 function Estado({ frase, autorLogado, onCurtir }) {
   const [curtido, setCurtido] = useState(false);
-  const [numCurtidas, setNumCurtidas] = useState(0);
+  const [numCurtidas, setNumCurtidas] = useState(frase.curtidas ?? 0);
 
-  // Sincroniza estado local sempre que a frase muda (useEffect seguro)
+  // Atualiza o estado local sempre que a frase mudar
   useEffect(() => {
     if (!autorLogado) return;
-    setCurtido(!!frase.curtidoPor?.includes(autorLogado.nome));
+    setCurtido(frase.curtidoPor?.includes(autorLogado.nome) || false);
     setNumCurtidas(frase.curtidas ?? 0);
   }, [frase, autorLogado]);
 
   if (!autorLogado) return null;
 
   const handleCurtirClick = async () => {
-    if (!autorLogado) return;
     const res = await onCurtir(frase._id);
     if (res) {
-      // atualiza estado local imediato
+      // Atualiza estado local imediatamente
       setCurtido(res.curtidoPor.includes(autorLogado.nome));
       setNumCurtidas(res.curtidas);
     }
