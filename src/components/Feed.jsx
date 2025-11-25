@@ -46,59 +46,48 @@ function Feed() {
     return () => clearTimeout(timeout);
   }, [novaFrase]);
 
-  // Curtir frase (otimista)
+  // Curtir frase
   const handleCurtir = async (fraseId) => {
     if (!autorLogado) return;
 
-    // Atualiza UI imediatamente
-    setFrases(prev =>
-      prev.map(f => {
-        if (f._id !== fraseId) return f;
-        const jaCurtiu = f.curtidoPor?.includes(autorLogado.nome);
-        return {
-          ...f,
-          curtidas: jaCurtiu ? f.curtidas - 1 : f.curtidas + 1,
-          curtidoPor: jaCurtiu
-            ? f.curtidoPor.filter(u => u !== autorLogado.nome)
-            : [...(f.curtidoPor || []), autorLogado.nome]
-        };
-      })
-    );
-
-    // Atualiza backend
     try {
-      await axios.post(
+      const res = await axios.post(
         `https://motiva-mais-3.onrender.com/frases/${fraseId}/curtir`,
         { usuario: autorLogado.nome }
+      );
+
+      setFrases(prev =>
+        prev.map(f =>
+          f._id === fraseId
+            ? {
+                ...f,
+                curtidas: res.data.curtidas,
+                curtidoPor: res.data.curtidoPor
+              }
+            : f
+        )
       );
     } catch (error) {
       console.error(error);
     }
   };
 
-  // Salvar frase (otimista)
+  // Salvar frase
   const handleSalvar = async (fraseId) => {
     if (!autorLogado) return;
 
-    // Atualiza UI imediatamente
-    setFrases(prev =>
-      prev.map(f => {
-        if (f._id !== fraseId) return f;
-        const jaSalvou = f.salvos?.includes(autorLogado.nome);
-        return {
-          ...f,
-          salvos: jaSalvou
-            ? f.salvos.filter(u => u !== autorLogado.nome)
-            : [...(f.salvos || []), autorLogado.nome]
-        };
-      })
-    );
-
-    // Atualiza backend
     try {
-      await axios.post(
+      const res = await axios.post(
         `https://motiva-mais-3.onrender.com/frases/${fraseId}/salvar`,
         { usuario: autorLogado.nome }
+      );
+
+      setFrases(prev =>
+        prev.map(f =>
+          f._id === fraseId
+            ? { ...f, salvos: res.data.salvos }
+            : f
+        )
       );
     } catch (error) {
       console.error(error);
