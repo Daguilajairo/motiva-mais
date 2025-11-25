@@ -93,14 +93,14 @@ function Cadastro() {
 
   return (
     <main className="bg-gradient-to-b from-blue-100 to-purple-100 h-screen w-full flex flex-col items-center">
-      <div className="mb-10 mt-2 flex flex-col items-center">
-        <h1 style={{ fontFamily: "'Dancing Script', cursive" }} className="font-bold text-7xl">
+      <div className="mb-5 sm:mb-2 mt-2 flex flex-col items-center">
+        <h1 style={{ fontFamily: "'Dancing Script', cursive" }} className="font-bold text-7xl text-purple-500">
           Motiva+
         </h1>
         <p>Crie sua conta e comece a inspirar</p>
       </div>
 
-      <div className="bg-zinc-50 w-85 h-125 rounded-xl shadow-lg p-6 flex flex-col pt-5">
+      <div className="bg-zinc-50 w-85 h-130 rounded-xl shadow-lg p-6 flex flex-col pt-5">
         <h1 className="font-bold text-2xl">Cadastro</h1>
 
         <form className="flex flex-col mt-4" onSubmit={handleCadastro}>

@@ -1,14 +1,14 @@
 import { useState } from "react";
 
 function Estado({ frase, autorLogado, onCurtir }) {
-  const [curtido, setCurtido] = useState(frase.curtidoPor?.includes(autorLogado?.nome) || false);
+  const [curtido, setCurtido] = useState(frase.curtidoPor?.includes(autorLogado?.nome_perfil) || false);
   const [curtidas, setCurtidas] = useState(frase.curtidas || 0);
 
   const handleCurtir = async () => {
     if (!autorLogado) return;
     const atualizado = await onCurtir(frase._id);
     if (atualizado) {
-      setCurtido(atualizado.curtidoPor.includes(autorLogado.nome));
+      setCurtido(atualizado.curtidoPor.includes(autorLogado.nome_perfil));
       setCurtidas(atualizado.curtidas);
     }
   };
