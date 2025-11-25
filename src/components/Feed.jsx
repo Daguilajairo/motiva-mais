@@ -35,26 +35,30 @@ function Feed() {
   }, []);
 
   useEffect(() => {
-    if (novaFrase) {
-      const timeout = setTimeout(() => {
-        setFrases(prev => [novaFrase, ...prev]);
-      }, 0);
-      return () => clearTimeout(timeout);
-    }
-  }, [novaFrase]);
+  if (!novaFrase) return;
 
-  // Curtir
+  // Atualiza o feed de forma segura após a renderização inicial
+  const atualizarFeed = () => {
+    setFrases(prev => [novaFrase, ...prev]);
+  };
+
+  // Usa setTimeout para "adiar" a atualização e evitar render loop
+  const timeout = setTimeout(atualizarFeed, 0);
+
+  return () => clearTimeout(timeout);
+}, [novaFrase]);
+
+
   const handleCurtir = async (fraseId) => {
     try {
-      const res = await axios.post(`https://motiva-mais-3.onrender.com/frases/${fraseId}/curtir`, {
-        usuario: autorLogado.nome
-      });
+      const res = await axios.post(
+        `https://motiva-mais-3.onrender.com/frases/${fraseId}/curtir`,
+        { usuario: autorLogado.nome }
+      );
 
       setFrases(prev =>
         prev.map(f =>
-          f._id === fraseId
-            ? { ...f, curtidas: res.data.curtidas, curtidoPor: res.data.curtidoPor }
-            : f
+          f._id === fraseId ? { ...f, curtidas: res.data.curtidas, curtidoPor: res.data.curtidoPor } : f
         )
       );
     } catch (error) {
@@ -62,18 +66,16 @@ function Feed() {
     }
   };
 
-  // Salvar
   const handleSalvar = async (fraseId) => {
     try {
-      const res = await axios.post(`https://motiva-mais-3.onrender.com/frases/${fraseId}/salvar`, {
-        usuario: autorLogado.nome
-      });
+      const res = await axios.post(
+        `https://motiva-mais-3.onrender.com/frases/${fraseId}/salvar`,
+        { usuario: autorLogado.nome }
+      );
 
       setFrases(prev =>
         prev.map(f =>
-          f._id === fraseId
-            ? { ...f, salvos: res.data.salvos }
-            : f
+          f._id === fraseId ? { ...f, salvos: res.data.salvos } : f
         )
       );
     } catch (error) {
@@ -94,7 +96,7 @@ function Feed() {
           <h3 className="font-semibold text-lg">Nenhuma frase publicada ainda</h3>
         </div>
       ) : (
-        frases.map((frase) => (
+        frases.map(frase => (
           <div key={frase._id} className="bg-zinc-50 w-85 h-auto mt-4 rounded-xl shadow-lg p-6 flex flex-col pt-4">
             <div className="flex gap-2">
               <img
@@ -104,21 +106,16 @@ function Feed() {
               />
               <div>
                 <h1 className="font-bold text-base">
-                  {frase.autor}
-                  {autorLogado && frase.autor === autorLogado.nome ? " (Você)" : ""}
+                  {frase.autor}{autorLogado && frase.autor === autorLogado.nome ? " (Você)" : ""}
                 </h1>
                 <p className="text-sm text-stone-500">{new Date(frase.created_at).toLocaleString()}</p>
               </div>
             </div>
 
-            <div className="mt-4">
-              <p className="text-base">{frase.texto}</p>
-            </div>
+            <div className="mt-4"><p className="text-base">{frase.texto}</p></div>
 
             <div className="flex mt-4 gap-2 text-purple-500">
-              {frase.hashtags.map((tag, index) => (
-                <p key={index}>#{tag}</p>
-              ))}
+              {frase.hashtags.map((tag, i) => <p key={i}>#{tag}</p>)}
             </div>
 
             <Estado

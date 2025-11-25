@@ -64,13 +64,11 @@ def curtir_frase(frase_id: str, usuario: str = Body(...)):
         return {"msg": "Frase não encontrada"}
 
     if usuario in frase.get("curtidoPor", []):
-        # descurtir
         frases_collection.update_one(
             {"_id": ObjectId(frase_id)},
             {"$pull": {"curtidoPor": usuario}, "$inc": {"curtidas": -1}}
         )
     else:
-        # curtir
         frases_collection.update_one(
             {"_id": ObjectId(frase_id)},
             {"$push": {"curtidoPor": usuario}, "$inc": {"curtidas": 1}}
