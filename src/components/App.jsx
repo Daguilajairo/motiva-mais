@@ -12,9 +12,9 @@ function App() {
   const handleLogin = async (e) => {
     e.preventDefault();
 
-    if (!login || !senha) { 
-      setErro("Preencha login e senha."); 
-      return; 
+    if (!login || !senha) {
+      setErro("Preencha login e senha.");
+      return;
     }
 
     const formData = new URLSearchParams();
@@ -60,25 +60,28 @@ function App() {
 
         <form className="flex flex-col mt-4 gap-1" onSubmit={handleLogin}>
           <label className="text-sm">Login</label>
-          <input 
-            type="text" 
-            placeholder="Digite seu Login" 
-            value={login} 
-            onChange={e => setLogin(e.target.value)}
+          <input
+            type="text"
+            placeholder="Digite seu Login"
+            value={login}
+            onChange={e => setLogin(e.target.value.toLowerCase())} // converte automaticamente para minuscula
             className="border text-sm border-zinc-300 rounded-md p-3 pl-2 mb-4 focus:border-purple-500 focus:outline-none"
+            autoCapitalize="none"  // impede capitalização automática no mobile
+            autoCorrect="off"      // desativa autocorreção
+            spellCheck="false"     // desativa verificação ortográfica
           />
 
           <label className="text-sm">Senha</label>
-          <input 
-            type="password" 
-            placeholder="********" 
-            value={senha} 
+          <input
+            type="password"
+            placeholder="********"
+            value={senha}
             onChange={e => setSenha(e.target.value)}
             className="border text-sm border-zinc-300 rounded-md p-3 mb-4 pl-2 focus:border-purple-500 focus:outline-none"
           />
 
-          <button 
-            type="submit" 
+          <button
+            type="submit"
             className="bg-gradient-to-l from-blue-600 to-purple-500 text-white rounded-md p-3 hover:scale-105 transition-transform"
           >
             Entrar
@@ -89,7 +92,7 @@ function App() {
 
         <div className="mt-6 text-center text-base">
           <p>
-            Não tem uma conta? 
+            Não tem uma conta?
             <Link to="/cadastro" className="text-purple-500 pl-1 inline-block hover:scale-105">
               Cadastre-se
             </Link>
