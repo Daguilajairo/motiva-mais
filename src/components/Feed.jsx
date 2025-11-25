@@ -11,6 +11,7 @@ function Feed() {
   const [frases, setFrases] = useState([]);
   const [autorLogado, setAutorLogado] = useState(null);
 
+  // Carrega o feed e o usuário logado
   useEffect(() => {
     const carregarFeed = async () => {
       try {
@@ -34,49 +35,70 @@ function Feed() {
     carregarFeed();
   }, []);
 
+  // Adiciona nova frase se vier do state
   useEffect(() => {
-  if (!novaFrase) return;
+    if (!novaFrase) return;
 
-  // Atualiza o feed de forma segura após a renderização inicial
-  const atualizarFeed = () => {
-    setFrases(prev => [novaFrase, ...prev]);
-  };
+    const timeout = setTimeout(() => {
+      setFrases(prev => [novaFrase, ...prev]);
+    }, 0);
 
-  // Usa setTimeout para "adiar" a atualização e evitar render loop
-  const timeout = setTimeout(atualizarFeed, 0);
+    return () => clearTimeout(timeout);
+  }, [novaFrase]);
 
-  return () => clearTimeout(timeout);
-}, [novaFrase]);
-
-
+  // Curtir frase (otimista)
   const handleCurtir = async (fraseId) => {
+    if (!autorLogado) return;
+
+    // Atualiza UI imediatamente
+    setFrases(prev =>
+      prev.map(f => {
+        if (f._id !== fraseId) return f;
+        const jaCurtiu = f.curtidoPor?.includes(autorLogado.nome);
+        return {
+          ...f,
+          curtidas: jaCurtiu ? f.curtidas - 1 : f.curtidas + 1,
+          curtidoPor: jaCurtiu
+            ? f.curtidoPor.filter(u => u !== autorLogado.nome)
+            : [...(f.curtidoPor || []), autorLogado.nome]
+        };
+      })
+    );
+
+    // Atualiza backend
     try {
-      const res = await axios.post(
+      await axios.post(
         `https://motiva-mais-3.onrender.com/frases/${fraseId}/curtir`,
         { usuario: autorLogado.nome }
-      );
-
-      setFrases(prev =>
-        prev.map(f =>
-          f._id === fraseId ? { ...f, curtidas: res.data.curtidas, curtidoPor: res.data.curtidoPor } : f
-        )
       );
     } catch (error) {
       console.error(error);
     }
   };
 
+  // Salvar frase (otimista)
   const handleSalvar = async (fraseId) => {
+    if (!autorLogado) return;
+
+    // Atualiza UI imediatamente
+    setFrases(prev =>
+      prev.map(f => {
+        if (f._id !== fraseId) return f;
+        const jaSalvou = f.salvos?.includes(autorLogado.nome);
+        return {
+          ...f,
+          salvos: jaSalvou
+            ? f.salvos.filter(u => u !== autorLogado.nome)
+            : [...(f.salvos || []), autorLogado.nome]
+        };
+      })
+    );
+
+    // Atualiza backend
     try {
-      const res = await axios.post(
+      await axios.post(
         `https://motiva-mais-3.onrender.com/frases/${fraseId}/salvar`,
         { usuario: autorLogado.nome }
-      );
-
-      setFrases(prev =>
-        prev.map(f =>
-          f._id === fraseId ? { ...f, salvos: res.data.salvos } : f
-        )
       );
     } catch (error) {
       console.error(error);
@@ -87,7 +109,7 @@ function Feed() {
     <section className="bg-gradient-to-b from-blue-100 to-purple-100 h-screen w-full flex flex-col items-center">
       <Menu />
 
-      <div className="flex items-center justify-between h-20 w-85 ">
+      <div className="flex items-center justify-between h-20 w-85">
         <h2 className="font-bold text-2xl">Feed</h2>
       </div>
 

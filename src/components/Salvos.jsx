@@ -79,7 +79,7 @@ function Salvos() {
 
             <div className="mt-4 flex">
               <button onClick={() => handleSalvar(f._id)} className="flex items-center gap-1 cursor-pointer">
-                <img className="w-5 h-5 hover:scale-110" src="src/assets/img/icon-save-yellow.png" alt="Remover dos salvos" />
+                <img className="w-5 h-5 hover:scale-110" src="/img/icon-save-yellow.png" alt="Remover dos salvos" />
                 <span className="font-bold text-purple-500">Remover</span>
               </button>
             </div>
