@@ -14,7 +14,7 @@ function Header() {
                 </h1>
                 <img
                     className="w-8 h-8 hover:scale-110 cursor-pointer"
-                    src="../assets/img/icon-menu.png"
+                    src="/img/icon-menu.png"
                     onClick={() => setMenuOpen(!menuOpen)}
                 />
             </header>
