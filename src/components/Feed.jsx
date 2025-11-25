@@ -39,31 +39,43 @@ function Feed() {
       const timeout = setTimeout(() => {
         setFrases(prev => [novaFrase, ...prev]);
       }, 0);
-
       return () => clearTimeout(timeout);
     }
   }, [novaFrase]);
 
+  // Curtir
   const handleCurtir = async (fraseId) => {
     try {
-      await axios.post(`https://motiva-mais-3.onrender.com/frases/${fraseId}/curtir`);
-      setFrases(prev => prev.map(f => f._id === fraseId ? { ...f, curtidas: f.curtidas + 1, curtidoPor: [...(f.curtidoPor || []), autorLogado.nome] } : f));
+      const res = await axios.post(`https://motiva-mais-3.onrender.com/frases/${fraseId}/curtir`, {
+        usuario: autorLogado.nome
+      });
+
+      setFrases(prev =>
+        prev.map(f =>
+          f._id === fraseId
+            ? { ...f, curtidas: res.data.curtidas, curtidoPor: res.data.curtidoPor }
+            : f
+        )
+      );
     } catch (error) {
       console.error(error);
     }
   };
 
+  // Salvar
   const handleSalvar = async (fraseId) => {
     try {
-      const usuario = autorLogado?.nome;
-      if (!usuario) return;
+      const res = await axios.post(`https://motiva-mais-3.onrender.com/frases/${fraseId}/salvar`, {
+        usuario: autorLogado.nome
+      });
 
-      await axios.post(`https://motiva-mais-3.onrender.com/frases/${fraseId}/salvar`, { usuario });
-
-      setFrases(prev => prev.map(f => f._id === fraseId
-        ? { ...f, salvos: f.salvos?.includes(usuario) ? f.salvos.filter(u => u !== usuario) : [...(f.salvos || []), usuario] }
-        : f
-      ));
+      setFrases(prev =>
+        prev.map(f =>
+          f._id === fraseId
+            ? { ...f, salvos: res.data.salvos }
+            : f
+        )
+      );
     } catch (error) {
       console.error(error);
     }
@@ -109,7 +121,6 @@ function Feed() {
               ))}
             </div>
 
-            {/* Componente Estado com curtidas e salvos */}
             <Estado
               frase={frase}
               autorLogado={autorLogado}

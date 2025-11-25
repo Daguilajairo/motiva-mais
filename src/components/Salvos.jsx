@@ -4,31 +4,50 @@ import axios from "axios";
 
 function Salvos() {
   const [frasesSalvas, setFrasesSalvas] = useState([]);
- // const [usuarioLogado, setUsuarioLogado] = useState(null);
+  const [usuarioLogado, setUsuarioLogado] = useState(null);
 
   useEffect(() => {
-    const carregarSalvos = async () => {
-      // Pega usuário do localStorage
-      const usuarioStr = localStorage.getItem("usuario");
-      const usuarioObj = usuarioStr ? JSON.parse(usuarioStr) : null;
-      if (!usuarioObj) return;
+  const usuarioStr = localStorage.getItem("usuario");
+  const usuarioObj = usuarioStr ? JSON.parse(usuarioStr) : null;
+  if (!usuarioObj) return;
 
-      //setUsuarioLogado(usuarioObj);
+  // Encapsula dentro de uma função async para evitar warnings
+  const carregarSalvos = async () => {
+    setUsuarioLogado(usuarioObj); // agora dentro da função
+    try {
+      const res = await axios.get("https://motiva-mais-3.onrender.com/frases");
+      const salvosDoUsuario = res.data.frases.filter(frase =>
+        frase.salvos?.includes(usuarioObj.nome)
+      );
+      setFrasesSalvas(salvosDoUsuario);
+    } catch (error) {
+      console.error("Erro ao buscar frases salvas:", error);
+    }
+  };
 
-      try {
-        const res = await axios.get("https://motiva-mais-3.onrender.com/frases");
-        // Filtra apenas frases que o usuário salvou
-        const salvosDoUsuario = res.data.frases.filter(frase =>
-          frase.salvos?.includes(usuarioObj.nome)
-        );
-        setFrasesSalvas(salvosDoUsuario);
-      } catch (error) {
-        console.error("Erro ao buscar frases salvas:", error);
-      }
-    };
+  carregarSalvos();
+}, []);
 
-    carregarSalvos();
-  }, []);
+
+  // Função para remover ou salvar novamente em tempo real
+  const handleSalvar = async (fraseId) => {
+    if (!usuarioLogado) return;
+
+    try {
+      const res = await axios.post(`https://motiva-mais-3.onrender.com/frases/${fraseId}/salvar`, {
+        usuario: usuarioLogado.nome
+      });
+
+      // Atualiza a lista localmente
+      setFrasesSalvas(prev =>
+        prev.some(f => f._id === fraseId)
+          ? prev.filter(f => f._id !== fraseId) // remove se já estava salvo
+          : [...prev, { ...res.data.frase, salvos: [usuarioLogado.nome] }] // adiciona se salvou
+      );
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   return (
     <section className="bg-gradient-to-b from-blue-100 to-purple-100 h-screen w-full flex flex-col items-center">
@@ -74,6 +93,18 @@ function Salvos() {
               {frase.hashtags.map((tag, index) => (
                 <p key={index}>#{tag}</p>
               ))}
+            </div>
+
+            {/* Botão para remover dos salvos */}
+            <div className="mt-4 flex">
+              <button onClick={() => handleSalvar(frase._id)} className="flex items-center gap-1 cursor-pointer">
+                <img
+                  className="w-5 h-5 hover:scale-110"
+                  src="src/assets/img/icon-save-yellow.png"
+                  alt="Remover dos salvos"
+                />
+                <span className="font-bold text-purple-500">Remover</span>
+              </button>
             </div>
           </div>
         ))
