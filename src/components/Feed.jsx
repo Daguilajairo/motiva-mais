@@ -116,21 +116,32 @@ function Feed() {
             </div>
 
             {/* Botões Curtir e Salvar */}
-            <div className="flex mt-4 gap-4 items-center">
-              <button
-                onClick={() => handleCurtir(frase._id)}
-                className="text-purple-500 font-bold"
-              >
-                👍 {frase.curtidas || 0}
-              </button>
+<div className="flex mt-4 gap-4 items-center">
+  {/* Curtir */}
+  <button
+    onClick={() => handleCurtir(frase._id)}
+    className="cursor-pointer"
+  >
+    <img
+      className="w-6 h-6"
+      src={frase.curtidoPor?.includes(autorLogado?.nome) ? "src/assets/img/icon-favorite-red.png" : "src/assets/img/icon-favorite.png"}
+      alt="Curtir"
+    />
+    <span className="ml-1 font-bold text-purple-500">{frase.curtidas || 0}</span>
+  </button>
 
-              <button
-                onClick={() => handleSalvar(frase._id)}
-                className={`text-purple-500 font-bold ${frase.salvos?.includes(autorLogado?.nome) ? "text-red-500" : ""}`}
-              >
-                💾
-              </button>
-            </div>
+  {/* Salvar */}
+  <button
+    onClick={() => handleSalvar(frase._id)}
+    className="cursor-pointer"
+  >
+    <img
+      className="w-6 h-6"
+      src={frase.salvos?.includes(autorLogado?.nome) ? "src/assets/img/icon-save-yellow.png" : "src/assets/img/icon-save-ligth.png"}
+      alt="Salvar"
+    />
+  </button>
+</div>
 
             <Estado />
           </div>

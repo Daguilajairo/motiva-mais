@@ -20,22 +20,23 @@ def criar_frase(frase: Frase):
         "hashtags": frase.hashtags,
         "autor": frase.autor,
         "created_at": datetime.utcnow(),
-        "curtidas": 0,        # contador de curtidas
-        "salvos": []  
+        "curtidas": 0,
+        "curtidoPor": [],  # <- adiciona aqui
+        "salvos": []
     }
     resultado = frases_collection.insert_one(nova_frase)
     return {
-    
-    "frase": {
-        "_id": str(resultado.inserted_id),
-        "texto": frase.texto,
-        "hashtags": frase.hashtags,
-        "autor": frase.autor,
-        "created_at": datetime.utcnow().isoformat(),
-        "curtidas": 0,
-        "salvos": []
+        "frase": {
+            "_id": str(resultado.inserted_id),
+            "texto": frase.texto,
+            "hashtags": frase.hashtags,
+            "autor": frase.autor,
+            "created_at": datetime.utcnow().isoformat(),
+            "curtidas": 0,
+            "curtidoPor": [],
+            "salvos": []
+        }
     }
-}
 
 # GET: listar frases
 @router.get("/frases")
@@ -54,16 +55,25 @@ def listar_frases():
 
 # Curtir frase
 @router.post("/frases/{frase_id}/curtir")
-def curtir_frase(frase_id: str):
+def curtir_frase(frase_id: str, usuario: str):
     frase = frases_collection.find_one({"_id": ObjectId(frase_id)})
     if not frase:
         return {"msg": "Frase não encontrada"}
-    
-    frases_collection.update_one(
-        {"_id": ObjectId(frase_id)},
-        {"$inc": {"curtidas": 1}}
-    )
-    return {"msg": "Frase curtida com sucesso"}
+
+    if usuario in frase.get("curtidoPor", []):
+        # descurtir
+        frases_collection.update_one(
+            {"_id": ObjectId(frase_id)},
+            {"$pull": {"curtidoPor": usuario}, "$inc": {"curtidas": -1}}
+        )
+        return {"msg": "Frase descurtida"}
+    else:
+        # curtir
+        frases_collection.update_one(
+            {"_id": ObjectId(frase_id)},
+            {"$push": {"curtidoPor": usuario}, "$inc": {"curtidas": 1}}
+        )
+        return {"msg": "Frase curtida"}
 
 # Salvar frase
 @router.post("/frases/{frase_id}/salvar")
