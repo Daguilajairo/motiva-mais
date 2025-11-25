@@ -39,21 +39,24 @@ function Feed() {
     return () => clearTimeout(id);
   }, [novaFrase]);
 
- const handleCurtir = async (fraseId) => {
+ // Feed.jsx
+const handleCurtir = async (fraseId) => {
   if (!usuarioLogado) return;
 
   try {
     const res = await axios.post(`${BASE_URL}/frases/${fraseId}/curtir`, { usuario: usuarioLogado.nome });
-    const fraseAtualizada = res.data;
+    const fraseAtualizada = res.data; // { _id, curtidas, curtidoPor }
 
     // Atualiza o estado do feed globalmente
     setFrases(prev => prev.map(f => f._id === fraseId ? { ...f, ...fraseAtualizada } : f));
 
+    // Retorna para atualizar o Estado.jsx
     return fraseAtualizada;
   } catch (err) {
     console.error(err);
   }
 };
+
 
 
 

@@ -4,16 +4,11 @@ function Estado({ frase, autorLogado, onCurtir }) {
   const [curtido, setCurtido] = useState(false);
   const [numCurtidas, setNumCurtidas] = useState(0);
 
-  // sincroniza estado local sempre que a frase ou o usuário mudarem
+  // Sincroniza estado local sempre que a frase muda (useEffect seguro)
   useEffect(() => {
     if (!autorLogado) return;
-    // função para atualizar o estado de forma segura
-    const atualizarEstado = () => {
-      setCurtido(frase.curtidoPor?.includes(autorLogado.nome) || false);
-      setNumCurtidas(frase.curtidas || 0);
-    };
-    // chama dentro do efeito, evita setState direto na render
-    atualizarEstado();
+    setCurtido(!!frase.curtidoPor?.includes(autorLogado.nome));
+    setNumCurtidas(frase.curtidas ?? 0);
   }, [frase, autorLogado]);
 
   if (!autorLogado) return null;
@@ -22,6 +17,7 @@ function Estado({ frase, autorLogado, onCurtir }) {
     if (!autorLogado) return;
     const res = await onCurtir(frase._id);
     if (res) {
+      // atualiza estado local imediato
       setCurtido(res.curtidoPor.includes(autorLogado.nome));
       setNumCurtidas(res.curtidas);
     }
