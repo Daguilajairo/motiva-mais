@@ -9,7 +9,19 @@ function Feed() {
   const { novaFrase } = location.state || {};
 
   const [frases, setFrases] = useState([]);
+  const [_frasesSalvas, _setFrasesSalvas] = useState([]); // novas frases salvas
   const [autorLogado, setAutorLogado] = useState(null);
+
+  // Função para carregar frases salvas do usuário
+  const carregarSalvos = async () => {
+    if (!autorLogado) return;
+    try {
+      const res = await axios.get(`https://motiva-mais-3.onrender.com/salvos/${autorLogado.nome}`);
+      _setFrasesSalvas(res.data.frases);
+    } catch (err) {
+      console.error("Erro ao carregar frases salvas:", err);
+    }
+  };
 
   // Carrega o feed e o usuário logado
   useEffect(() => {
@@ -27,6 +39,12 @@ function Feed() {
 
         const res = await axios.get("https://motiva-mais-3.onrender.com/frases");
         setFrases(res.data.frases);
+
+        // Carrega frases salvas do usuário
+        if (usuarioObj) {
+          carregarSalvos();
+        }
+
       } catch (error) {
         console.error("Erro ao buscar frases:", error);
       }
@@ -46,47 +64,52 @@ function Feed() {
     return () => clearTimeout(timeout);
   }, [novaFrase]);
 
- const handleCurtir = async (fraseId) => {
-  if (!autorLogado) return;
+  // Curtir frase
+  const handleCurtir = async (fraseId) => {
+    if (!autorLogado) return;
 
-  try {
-    const res = await axios.post(
-      `https://motiva-mais-3.onrender.com/frases/${fraseId}/curtir`,
-      { usuario: autorLogado.nome }
-    );
+    try {
+      const res = await axios.post(
+        `https://motiva-mais-3.onrender.com/frases/${fraseId}/curtir`,
+        { usuario: autorLogado.nome }
+      );
 
-    setFrases(prev =>
-      prev.map(f =>
-        f._id === fraseId
-          ? { ...f, curtidas: res.data.curtidas, curtidoPor: res.data.curtidoPor }
-          : f
-      )
-    );
-  } catch (error) {
-    console.error(error);
-  }
-};
+      setFrases(prev =>
+        prev.map(f =>
+          f._id === fraseId
+            ? { ...f, curtidas: res.data.curtidas, curtidoPor: res.data.curtidoPor }
+            : f
+        )
+      );
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
-const handleSalvar = async (fraseId) => {
-  if (!autorLogado) return;
+  // Salvar frase
+  const handleSalvar = async (fraseId) => {
+    if (!autorLogado) return;
 
-  try {
-    const res = await axios.post(
-      `https://motiva-mais-3.onrender.com/frases/${fraseId}/salvar`,
-      { usuario: autorLogado.nome }
-    );
+    try {
+      const res = await axios.post(
+        `https://motiva-mais-3.onrender.com/frases/${fraseId}/salvar`,
+        { usuario: autorLogado.nome }
+      );
 
-    setFrases(prev =>
-      prev.map(f =>
-        f._id === fraseId
-          ? { ...f, salvos: res.data.salvos }
-          : f
-      )
-    );
-  } catch (error) {
-    console.error(error);
-  }
-};
+      setFrases(prev =>
+        prev.map(f =>
+          f._id === fraseId
+            ? { ...f, salvos: res.data.salvos }
+            : f
+        )
+      );
+
+      // Atualiza lista de frases salvas
+      carregarSalvos();
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   return (
     <section className="bg-gradient-to-b from-blue-100 to-purple-100 h-screen w-full flex flex-col items-center">

@@ -1,35 +1,27 @@
 import { useState } from "react";
 
 function Estado({ frase, autorLogado, onCurtir, onSalvar }) {
-  // compute autor's name safely so hooks run on every render
   const autorNome = autorLogado?.nome;
 
-  // Deriva direto da prop
-  const curtidoInicial = frase.curtidoPor?.includes(autorNome) || false;
-  const salvoInicial = frase.salvos?.includes(autorNome) || false;
+  const [curtido, setCurtido] = useState(frase.curtidoPor?.includes(autorNome) || false);
+  const [salvo, setSalvo] = useState(frase.salvos?.includes(autorNome) || false);
+  const [numCurtidas, setNumCurtidas] = useState(frase.curtidas || 0);
 
-  // Estados locais apenas para otimista
-  const [curtido, setCurtido] = useState(curtidoInicial);
-  const [salvo, setSalvo] = useState(salvoInicial);
+  const handleCurtirClick = async () => {
+    setCurtido(prev => !prev); // ícone muda imediatamente
+    setNumCurtidas(prev => curtido ? prev - 1 : prev + 1); // contador muda imediatamente
 
-  if (!autorLogado) {
-    return null;
-  }
-
-  const handleCurtirClick = () => {
-    setCurtido(prev => !prev); // muda ícone imediatamente
-    onCurtir(); // atualiza backend e Feed
+    await onCurtir(); // chama função do Feed.jsx que atualiza backend e array do feed
   };
 
-  const handleSalvarClick = () => {
-    setSalvo(prev => !prev);
-    onSalvar();
+  const handleSalvarClick = async () => {
+    setSalvo(prev => !prev); // ícone muda imediatamente
+    await onSalvar(); // atualiza backend
   };
 
   return (
     <div className="mt-6 flex justify-between items-center">
       <div className="flex items-center gap-4">
-
         {/* Curtir */}
         <button onClick={handleCurtirClick} className="flex items-center gap-1 cursor-pointer">
           <img
@@ -37,7 +29,7 @@ function Estado({ frase, autorLogado, onCurtir, onSalvar }) {
             src={curtido ? "/img/icon-favorite-red.png" : "/img/icon-favorite.png"}
             alt="Curtir"
           />
-          <span className="font-bold text-purple-500">{frase.curtidas || 0}</span>
+          <span className="font-bold text-purple-500">{numCurtidas}</span>
         </button>
 
         {/* Salvar */}
@@ -48,7 +40,6 @@ function Estado({ frase, autorLogado, onCurtir, onSalvar }) {
             alt="Salvar"
           />
         </button>
-
       </div>
     </div>
   );

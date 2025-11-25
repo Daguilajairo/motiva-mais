@@ -104,3 +104,21 @@ def salvar_frase(frase_id: str, usuario: str = Body(...)):
         "_id": str(frase_atualizada["_id"]),
         "salvos": frase_atualizada.get("salvos", [])
     }
+
+# GET: listar frases salvas de um usuário
+@router.get("/salvos/{usuario}")
+def listar_frases_salvas(usuario: str):
+    frases_cursor = frases_collection.find({"salvos": usuario}).sort("created_at", -1)
+    frases = []
+    for f in frases_cursor:
+        frases.append({
+            "_id": str(f["_id"]),
+            "texto": f["texto"],
+            "hashtags": f["hashtags"],
+            "autor": f["autor"],
+            "created_at": f["created_at"].isoformat(),
+            "curtidas": f.get("curtidas", 0),
+            "curtidoPor": f.get("curtidoPor", []),
+            "salvos": f.get("salvos", [])
+        })
+    return {"frases": frases}
