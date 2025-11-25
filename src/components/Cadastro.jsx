@@ -13,47 +13,44 @@ function Cadastro() {
   const BASE_URL = "https://motiva-mais-3.onrender.com";
 
   const handleCadastro = async (e) => {
-    e.preventDefault();
+  e.preventDefault();
 
-    if (senha !== confirmaSenha) {
-      setErro("As senhas não conferem");
-      return;
+  if (senha !== confirmaSenha) {
+    setErro("As senhas não conferem");
+    return;
+  }
+
+  try {
+    const res = await fetch(`${BASE_URL}/registrar`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ nome, senha }) // somente o que o backend espera
+    });
+
+    const result = await res.json();
+
+    if (res.ok) {
+      setSucesso("Usuário cadastrado com sucesso!");
+      setErro("");
+
+      setNome("");
+      setSenha("");
+      setConfirmaSenha("");
+
+      const usuarioCadastrado = { nome, senha, foto: result.foto };
+      localStorage.setItem("usuario", JSON.stringify(usuarioCadastrado));
+
+      navigate("/feed");
+    } else {
+      setErro(result.detail || result.msg || "Erro ao cadastrar usuário");
     }
-
-    const formData = new FormData();
-    formData.append("nome", nome);
-    formData.append("senha", senha);
-    formData.append("dataNascimento", dataNascimento);
-
-    try {
-      const res = await fetch(`${BASE_URL}/registrar`, {
-        method: "POST",
-        body: formData
-      });
-
-      const result = await res.json();
-
-      if (res.ok) {
-        setSucesso("Usuário cadastrado com sucesso!");
-        setErro("");
-
-        setNome("");
-        setDataNascimento("");
-        setSenha("");
-        setConfirmaSenha("");
-
-        const usuarioCadastrado = { nome, dataNascimento, senha, foto: result.foto };
-        localStorage.setItem("usuario", JSON.stringify(usuarioCadastrado));
-
-        navigate("/feed");
-      } else {
-        setErro(result.detail || result.msg || "Erro ao cadastrar usuário");
-      }
-    } catch (err) {
-      console.error(err);
-      setErro("Erro ao conectar ao servidor");
-    }
-  };
+  } catch (err) {
+    console.error(err);
+    setErro("Erro ao conectar ao servidor");
+  }
+};
 
   return (
     <main className="bg-gradient-to-b from-blue-100 to-purple-100 h-screen w-full flex flex-col items-center">
