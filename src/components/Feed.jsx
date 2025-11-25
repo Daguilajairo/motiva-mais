@@ -39,13 +39,19 @@ function Feed() {
     return () => clearTimeout(id);
   }, [novaFrase]);
 
-  const handleCurtir = async (fraseId) => {
-    if (!usuarioLogado) return;
-    try {
-      const res = await axios.post(`${BASE_URL}/frases/${fraseId}/curtir`, { usuario: usuarioLogado.nome });
-      setFrases(prev => prev.map(f => f._id === fraseId ? { ...f, ...res.data } : f));
-    } catch (err) { console.error(err); }
-  };
+ const handleCurtir = async (fraseId) => {
+  if (!usuarioLogado) return;
+  try {
+    const res = await axios.post(`${BASE_URL}/frases/${fraseId}/curtir`, { usuario: usuarioLogado.nome });
+    const fraseAtualizada = res.data; // _id, curtidas, curtidoPor
+
+    // Atualiza o estado do feed
+    setFrases(prev => prev.map(f => f._id === fraseId ? { ...f, ...fraseAtualizada } : f));
+    
+    return fraseAtualizada; // retorna para Estado.jsx atualizar local
+  } catch (err) { console.error(err); }
+};
+
 
   return (
     <section className="bg-gradient-to-b from-blue-100 to-purple-100 h-screen w-full flex flex-col items-center">
