@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import Menu from "./Menu.jsx";
 import Estado from "./Estado.jsx";
@@ -10,9 +10,6 @@ function Feed() {
 
   const [frases, setFrases] = useState([]);
   const [autorLogado, setAutorLogado] = useState(null);
-  const [fotoPerfil, setFotoPerfil] = useState(null);
-
-  const inputFileRef = useRef(null);
 
   // Carrega feed e usuário logado
   useEffect(() => {
@@ -25,11 +22,8 @@ function Feed() {
 
       const usuarioStr = localStorage.getItem("usuario");
       const usuarioObj = usuarioStr ? JSON.parse(usuarioStr) : null;
+      if (!usuarioObj) return;
       setAutorLogado(usuarioObj);
-
-      // Carrega foto do perfil
-      const foto = localStorage.getItem("fotoPerfil");
-      if (foto) setFotoPerfil(foto);
 
       try {
         const res = await axios.get("https://motiva-mais-3.onrender.com/frases");
@@ -45,27 +39,11 @@ function Feed() {
   // Adiciona nova frase
   useEffect(() => {
     if (!novaFrase) return;
-    const id = setTimeout(() => setFrases(prev => [novaFrase, ...prev]), 0);
+    const id = setTimeout(() => {
+      setFrases(prev => [novaFrase, ...prev]);
+    }, 0);
     return () => clearTimeout(id);
   }, [novaFrase]);
-
-  // Escolher imagem do perfil
-  const handleAvatarClick = () => {
-    inputFileRef.current.click();
-  };
-
-  const handleFileChange = (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = () => {
-      const base64 = reader.result;
-      setFotoPerfil(base64);
-      localStorage.setItem("fotoPerfil", base64);
-    };
-    reader.readAsDataURL(file);
-  };
 
   // Curtir
   const handleCurtir = async (fraseId) => {
@@ -99,6 +77,32 @@ function Feed() {
     }
   };
 
+  // === NOVO: Upload de avatar ===
+  const handleAvatarChange = async (event) => {
+    if (!autorLogado) return;
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append("file", file);
+
+    try {
+      const res = await axios.post(
+        `https://motiva-mais-3.onrender.com/usuarios/${autorLogado.nome}/upload-foto`,
+        formData,
+        { headers: { "Content-Type": "multipart/form-data" } }
+      );
+
+      // Atualiza o objeto do usuário local
+      const usuarioAtualizado = { ...autorLogado, foto: res.data.foto_url };
+      setAutorLogado(usuarioAtualizado);
+      localStorage.setItem("usuario", JSON.stringify(usuarioAtualizado));
+
+    } catch (err) {
+      console.error("Erro ao enviar foto:", err);
+    }
+  };
+
   return (
     <section className="bg-gradient-to-b from-blue-100 to-purple-100 h-screen w-full flex flex-col items-center">
       <Menu />
@@ -114,19 +118,25 @@ function Feed() {
         frases.map(frase => (
           <div key={frase._id} className="bg-zinc-50 w-85 h-auto mt-4 rounded-xl shadow-lg p-6 flex flex-col pt-4">
             <div className="flex gap-2 items-center">
-              <img
-                className="w-12 h-12 hover:scale-110 cursor-pointer rounded-full"
-                src={fotoPerfil || "/img/icon-avatar.png"}
-                alt="avatar"
-                onClick={handleAvatarClick}
-              />
-              <input
-                type="file"
-                accept="image/*"
-                ref={inputFileRef}
-                className="hidden"
-                onChange={handleFileChange}
-              />
+              <label htmlFor={`avatar-${frase._id}`}>
+                <img
+                  className="w-12 h-12 hover:scale-110 cursor-pointer rounded-full"
+                  src={frase.autor === autorLogado?.nome && autorLogado?.foto
+                    ? autorLogado.foto
+                    : "/img/icon-avatar.png"
+                  }
+                  alt="avatar"
+                />
+              </label>
+              {frase.autor === autorLogado?.nome && (
+                <input
+                  id={`avatar-${frase._id}`}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleAvatarChange}
+                />
+              )}
               <div>
                 <h1 className="font-bold text-base">
                   {frase.autor}{autorLogado && frase.autor === autorLogado.nome ? " (Você)" : ""}
