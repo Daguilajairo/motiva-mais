@@ -22,7 +22,8 @@ function Publicar() {
         alert(res.data.msg);
         setTexto("");
         setHashtags("");
-        navigate("/feed"); // <<< redirecionar para o feed
+        navigate("/feed", { replace: true }); // redireciona
+        window.location.reload(); // força recarregar o componente e buscar frases novamente
     } catch (error) {
         console.error(error);
         alert("Erro ao publicar a frase");
