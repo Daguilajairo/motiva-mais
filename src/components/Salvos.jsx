@@ -6,37 +6,32 @@ function Salvos() {
   const [frasesSalvas, setFrasesSalvas] = useState([]);
   const [usuarioLogado, setUsuarioLogado] = useState(null);
 
-  // Carrega frases salvas do usuário
- useEffect(() => {
-  const carregarSalvos = async () => {
-    const usuarioStr = localStorage.getItem("usuario");
-    const usuarioObj = usuarioStr ? JSON.parse(usuarioStr) : null;
-    if (!usuarioObj) return;
+  useEffect(() => {
+    const carregarSalvos = async () => {
+      const usuarioStr = localStorage.getItem("usuario");
+      const usuarioObj = usuarioStr ? JSON.parse(usuarioStr) : null;
+      if (!usuarioObj) return;
+      setUsuarioLogado(usuarioObj);
 
-    setUsuarioLogado(usuarioObj); // agora só é chamado dentro da função
+      try {
+        const res = await axios.get("https://motiva-mais-3.onrender.com/frases");
+        const salvosDoUsuario = res.data.frases.filter(f => f.salvos?.includes(usuarioObj.nome));
+        setFrasesSalvas(salvosDoUsuario);
+      } catch (err) {
+        console.error(err);
+      }
+    };
 
-    try {
-      const res = await axios.get("https://motiva-mais-3.onrender.com/frases");
-      const salvosDoUsuario = res.data.frases.filter(f => f.salvos?.includes(usuarioObj.nome));
-      setFrasesSalvas(salvosDoUsuario);
-    } catch (err) {
-      console.error("Erro ao buscar frases salvas:", err);
-    }
-  };
-
-  carregarSalvos();
-}, []);
-
+    carregarSalvos();
+  }, []);
 
   const handleRemover = async (fraseId) => {
     if (!usuarioLogado) return;
-
     try {
       await axios.post(
         `https://motiva-mais-3.onrender.com/frases/${fraseId}/salvar`,
         { usuario: usuarioLogado.nome }
       );
-
       setFrasesSalvas(prev => prev.filter(f => f._id !== fraseId));
     } catch (err) {
       console.error(err);

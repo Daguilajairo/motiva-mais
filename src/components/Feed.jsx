@@ -11,20 +11,20 @@ function Feed() {
   const [frases, setFrases] = useState([]);
   const [autorLogado, setAutorLogado] = useState(null);
 
-  // Carrega feed e usuário
+  // Carrega feed e usuário logado
   useEffect(() => {
     const carregarFeed = async () => {
+      const token = sessionStorage.getItem("token");
+      if (!token) {
+        window.location.href = "/";
+        return;
+      }
+
+      const usuarioStr = localStorage.getItem("usuario");
+      const usuarioObj = usuarioStr ? JSON.parse(usuarioStr) : null;
+      setAutorLogado(usuarioObj);
+
       try {
-        const token = sessionStorage.getItem("token");
-        if (!token) {
-          window.location.href = "/";
-          return;
-        }
-
-        const usuarioStr = localStorage.getItem("usuario");
-        const usuarioObj = usuarioStr ? JSON.parse(usuarioStr) : null;
-        setAutorLogado(usuarioObj);
-
         const res = await axios.get("https://motiva-mais-3.onrender.com/frases");
         setFrases(res.data.frases);
       } catch (err) {
@@ -35,20 +35,20 @@ function Feed() {
     carregarFeed();
   }, []);
 
-  // Adiciona nova frase vindo de outra página
- useEffect(() => {
+  // Adiciona nova frase
+  useEffect(() => {
   if (!novaFrase) return;
 
-  // Cria uma função assíncrona interna ou timeout para evitar render síncrono
-  const adicionarFrase = () => {
+  // Coloca a atualização na fila do JS, evitando o warning
+  const id = setTimeout(() => {
     setFrases(prev => [novaFrase, ...prev]);
-  };
+  }, 0);
 
-  // Chamada imediata, mas agora não diretamente no corpo do useEffect
-  adicionarFrase();
+  return () => clearTimeout(id);
 }, [novaFrase]);
 
-  // Curtir frase
+
+  // Curtir
   const handleCurtir = async (fraseId) => {
     if (!autorLogado) return;
     try {
@@ -56,20 +56,15 @@ function Feed() {
         `https://motiva-mais-3.onrender.com/frases/${fraseId}/curtir`,
         { usuario: autorLogado.nome }
       );
-
       setFrases(prev =>
-        prev.map(f =>
-          f._id === fraseId
-            ? { ...f, curtidas: res.data.curtidas, curtidoPor: res.data.curtidoPor }
-            : f
-        )
+        prev.map(f => f._id === fraseId ? { ...f, ...res.data } : f)
       );
     } catch (err) {
       console.error(err);
     }
   };
 
-  // Salvar frase
+  // Salvar
   const handleSalvar = async (fraseId) => {
     if (!autorLogado) return;
     try {
@@ -77,13 +72,8 @@ function Feed() {
         `https://motiva-mais-3.onrender.com/frases/${fraseId}/salvar`,
         { usuario: autorLogado.nome }
       );
-
       setFrases(prev =>
-        prev.map(f =>
-          f._id === fraseId
-            ? { ...f, salvos: res.data.salvos }
-            : f
-        )
+        prev.map(f => f._id === fraseId ? { ...f, ...res.data } : f)
       );
     } catch (err) {
       console.error(err);
@@ -93,7 +83,6 @@ function Feed() {
   return (
     <section className="bg-gradient-to-b from-blue-100 to-purple-100 h-screen w-full flex flex-col items-center">
       <Menu />
-
       <div className="flex items-center justify-between h-20 w-85">
         <h2 className="font-bold text-2xl">Feed</h2>
       </div>
@@ -106,15 +95,9 @@ function Feed() {
         frases.map(frase => (
           <div key={frase._id} className="bg-zinc-50 w-85 h-auto mt-4 rounded-xl shadow-lg p-6 flex flex-col pt-4">
             <div className="flex gap-2">
-              <img
-                className="w-12 h-12 hover:scale-110 cursor-pointer"
-                src="/img/icon-avatar.png"
-                alt="avatar"
-              />
+              <img className="w-12 h-12 hover:scale-110 cursor-pointer" src="/img/icon-avatar.png" alt="avatar" />
               <div>
-                <h1 className="font-bold text-base">
-                  {frase.autor}{autorLogado && frase.autor === autorLogado.nome ? " (Você)" : ""}
-                </h1>
+                <h1 className="font-bold text-base">{frase.autor}{autorLogado && frase.autor === autorLogado.nome ? " (Você)" : ""}</h1>
                 <p className="text-sm text-stone-500">{new Date(frase.created_at).toLocaleString()}</p>
               </div>
             </div>
@@ -128,8 +111,8 @@ function Feed() {
             <Estado
               frase={frase}
               autorLogado={autorLogado}
-              onCurtir={() => handleCurtir(frase._id)}
-              onSalvar={() => handleSalvar(frase._id)}
+              onCurtir={handleCurtir}
+              onSalvar={handleSalvar}
             />
           </div>
         ))

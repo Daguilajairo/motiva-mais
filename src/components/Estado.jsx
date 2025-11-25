@@ -1,32 +1,18 @@
-import { useState, useEffect } from "react";
+import React from "react";
 
 function Estado({ frase, autorLogado, onCurtir, onSalvar }) {
-  const autorNome = autorLogado?.nome;
+  if (!autorLogado) return null;
 
-  const [curtido, setCurtido] = useState(false);
-  const [salvo, setSalvo] = useState(false);
-  const [numCurtidas, setNumCurtidas] = useState(0);
-
-  // Sincroniza estado com backend sempre que a frase mudar
-  useEffect(() => {
-    const atualizarEstado = () => {
-      setCurtido(frase.curtidoPor?.includes(autorNome) || false);
-      setSalvo(frase.salvos?.includes(autorNome) || false);
-      setNumCurtidas(frase.curtidas || 0);
-    };
-
-    atualizarEstado();
-  }, [frase, autorNome]);
+  const autorNome = autorLogado.nome;
+  const curtido = frase.curtidoPor?.includes(autorNome) || false;
+  const salvo = frase.salvos?.includes(autorNome) || false;
 
   const handleCurtirClick = async () => {
-    setCurtido(prev => !prev);
-    setNumCurtidas(prev => curtido ? prev - 1 : prev + 1);
-    await onCurtir();
+    await onCurtir(frase._id);
   };
 
   const handleSalvarClick = async () => {
-    setSalvo(prev => !prev);
-    await onSalvar();
+    await onSalvar(frase._id);
   };
 
   return (
@@ -39,7 +25,7 @@ function Estado({ frase, autorLogado, onCurtir, onSalvar }) {
             src={curtido ? "/img/icon-favorite-red.png" : "/img/icon-favorite.png"}
             alt="Curtir"
           />
-          <span className="font-bold text-purple-500">{numCurtidas}</span>
+          <span className="font-bold text-purple-500">{frase.curtidas || 0}</span>
         </button>
 
         {/* Salvar */}
