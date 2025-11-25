@@ -117,14 +117,12 @@ function Feed() {
           <div key={frase._id} className="bg-zinc-50 w-85 h-auto mt-4 rounded-xl shadow-lg p-6 flex flex-col pt-4">
             <div className="flex gap-2 items-center">
               <label htmlFor={`avatar-${frase._id}`}>
-                <img
-                  className="w-12 h-12 hover:scale-110 cursor-pointer rounded-full"
-                  src={frase.autor === autorLogado?.nome && autorLogado?.foto
-                    ? autorLogado.foto
-                    : "/img/icon-avatar.png"
-                  }
-                  alt="avatar"
-                />
+               <img
+  className="w-12 h-12 rounded-full"
+  src={frase.autor === autorLogado?.nome ? autorLogado.foto : "/img/icon-avatar.png"}
+  alt="avatar"
+/>
+
               </label>
               {frase.autor === autorLogado?.nome && (
                 <input
