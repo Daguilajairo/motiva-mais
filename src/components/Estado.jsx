@@ -1,32 +1,25 @@
-import React, { useState, useMemo } from "react";
+import { useState } from "react";
 
 function Estado({ frase, autorLogado, onCurtir }) {
-    const isCurtidoInicial = useMemo(() => autorLogado ? frase.curtidoPor?.includes(autorLogado.nome) || false : false, [frase.curtidoPor, autorLogado]);
-    const numCurtidasInicial = frase.curtidas ?? 0;
+  const [curtido, setCurtido] = useState(frase.curtidoPor?.includes(autorLogado?.nome) || false);
+  const [curtidas, setCurtidas] = useState(frase.curtidas || 0);
 
-    const [curtido, setCurtido] = useState(isCurtidoInicial);
-    const [numCurtidas, setNumCurtidas] = useState(numCurtidasInicial);
+  const handleCurtir = async () => {
+    if (!autorLogado) return;
+    const atualizado = await onCurtir(frase._id);
+    if (atualizado) {
+      setCurtido(atualizado.curtidoPor.includes(autorLogado.nome));
+      setCurtidas(atualizado.curtidas);
+    }
+  };
 
-    if (!autorLogado) return null;
-
-    const handleCurtirClick = async () => {
-        const res = await onCurtir(frase._id);
-        if (res) {
-            setCurtido(res.curtidoPor.includes(autorLogado.nome));
-            setNumCurtidas(res.curtidas);
-        }
-    };
-
-    return (
-        <div className="mt-6 flex justify-between items-center">
-            <div className="flex items-center gap-4">
-                <button onClick={handleCurtirClick} className="flex items-center gap-1 cursor-pointer">
-                    <img className="w-5 h-5 hover:scale-110" src={curtido ? "/img/icon-favorite-red.png" : "/img/icon-favorite.png"} alt="Curtir"/>
-                    <span className="font-bold text-purple-500">{numCurtidas}</span>
-                </button>
-            </div>
-        </div>
-    );
+  return (
+    <div className="flex gap-4 items-center mt-3">
+      <button onClick={handleCurtir}>
+        {curtido ? "💜" : "🤍"} {curtidas}
+      </button>
+    </div>
+  );
 }
 
 export default Estado;

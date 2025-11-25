@@ -5,29 +5,23 @@ from datetime import datetime, timedelta
 
 router = APIRouter()
 SECRET_KEY = "minha_chave_secreta"
-
-# URL base da API
 BASE_URL = "https://motiva-mais-3.onrender.com"
 
-# === Cadastro ===
+# Cadastro
 @router.post("/registrar")
-async def registrar(
-    nome: str = Form(...),
-    senha: str = Form(...)
-):
+async def registrar(nome: str = Form(...), senha: str = Form(...)):
     if users_collection.find_one({"nome": nome}):
         raise HTTPException(status_code=400, detail="Usuário já existe")
 
     usuario_dict = {"nome": nome, "senha": senha, "foto": f"{BASE_URL}/img/icon-avatar.png"}
     result = users_collection.insert_one(usuario_dict)
-
     return {
         "msg": "Usuário criado com sucesso",
         "id": str(result.inserted_id),
         "foto": usuario_dict["foto"]
     }
 
-# === Login ===
+# Login
 @router.post("/login")
 def login(nome: str = Form(...), senha: str = Form(...)):
     usuario = users_collection.find_one({"nome": nome, "senha": senha})
@@ -44,5 +38,4 @@ def login(nome: str = Form(...), senha: str = Form(...)):
         token = token.decode("utf-8")
 
     foto_url = usuario.get("foto", f"{BASE_URL}/img/icon-avatar.png")
-
     return {"msg": "Login realizado com sucesso", "token": token, "foto": foto_url}

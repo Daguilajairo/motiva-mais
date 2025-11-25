@@ -1,12 +1,15 @@
-import { StrictMode } from 'react'
-import { createRoot } from 'react-dom/client'
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
-import App from './components/App.jsx'
-import Feed from './components/Feed.jsx'
-import Publicar from './components/Publicar.jsx'
-import Cadastro from './components/Cadastro.jsx'
+import { StrictMode } from "react";
+import { createRoot } from "react-dom/client";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 
-createRoot(document.getElementById('root')).render(
+// Importando componentes
+import App from "./components/App.jsx";
+import Cadastro from "./components/Cadastro.jsx";
+import Feed from "./components/Feed.jsx";
+import Publicar from "./components/Publicar.jsx";
+
+// Root
+createRoot(document.getElementById("root")).render(
   <StrictMode>
     <BrowserRouter>
       <Routes>
@@ -17,4 +20,4 @@ createRoot(document.getElementById('root')).render(
       </Routes>
     </BrowserRouter>
   </StrictMode>
-)
+);

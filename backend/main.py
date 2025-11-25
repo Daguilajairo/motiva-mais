@@ -2,32 +2,31 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from routes import users, frases
-import os # Importe o módulo os
+import os
 
 app = FastAPI()
 
-# ... (Configuração CORS - não muda) ...
+# ===== Configuração CORS =====
+origins = ["*"]  # Para testes, permite qualquer origem
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
-# Adicione esta lógica ANTES de app.mount para criar os diretórios se eles não existirem
-# A pasta uploads é crucial para uploads de arquivos, mas se for apenas para o exemplo,
-# podemos garantir que ela exista.
-
+# ===== Pastas de arquivos estáticos =====
 STATIC_DIRS = ["uploads", "img"]
-
 for directory in STATIC_DIRS:
-    # Cria o diretório se ele não existir
     if not os.path.isdir(directory):
-        os.makedirs(directory, exist_ok=True) # use exist_ok=True para evitar erros se já existir
+        os.makedirs(directory, exist_ok=True)
 
-
-# Serve arquivos estáticos (uploads, imagens padrão)
-# Agora estas chamadas não falharão mais
 app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 app.mount("/img", StaticFiles(directory="img"), name="img")
 
-# ... (Seu código anterior para criar as pastas e configurar CORS) ...
-
-app.include_router(users.router, prefix="") # CORREÇÃO AQUI: Use prefixo vazio ""
+# ===== Rotas =====
+app.include_router(users.router, prefix="")
 app.include_router(frases.router)
 
 @app.get("/")
