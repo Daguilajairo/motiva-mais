@@ -1,4 +1,4 @@
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { useState } from "react";
 
 function Cadastro() {
@@ -8,8 +8,6 @@ function Cadastro() {
   const [confirmaSenha, setConfirmaSenha] = useState("");
   const [erro, setErro] = useState("");
   const [sucesso, setSucesso] = useState("");
-
-  const navigate = useNavigate(); // <-- adicionado
 
   const handleCadastro = async (e) => {
     e.preventDefault();
@@ -23,6 +21,7 @@ function Cadastro() {
 
     try {
       const response = await fetch("https://motiva-mais-3.onrender.com/registrar", {
+
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
@@ -33,19 +32,11 @@ function Cadastro() {
       if (response.ok) {
         setSucesso("Usuário cadastrado com sucesso!");
         setErro("");
-
         // Limpar formulário
         setNome("");
         setDataNascimento("");
         setSenha("");
         setConfirmaSenha("");
-
-        // Salva usuário no localStorage
-        const usuarioCadastrado = { nome, dataNascimento, senha };
-        localStorage.setItem("usuario", JSON.stringify(usuarioCadastrado));
-
-        // Redireciona para upload de foto
-        navigate("/upload-foto", { state: { usuario: usuarioCadastrado } });
       } else {
         setErro(result.msg || "Erro ao cadastrar usuário");
       }
