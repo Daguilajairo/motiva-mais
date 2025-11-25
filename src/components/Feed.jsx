@@ -69,6 +69,7 @@ function Feed() {
       alert("Erro ao excluir a frase");
     }
   };
+  
 
   // Ordena as frases de acordo com o filtro
   let frasesFiltradas = [...frases];
