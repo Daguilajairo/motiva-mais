@@ -19,8 +19,7 @@ app.add_middleware(
 # ===== Pastas de arquivos estáticos =====
 STATIC_DIRS = ["uploads", "img"]
 for directory in STATIC_DIRS:
-    if not os.path.isdir(directory):
-        os.makedirs(directory, exist_ok=True)
+    os.makedirs(directory, exist_ok=True)
 
 app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 app.mount("/img", StaticFiles(directory="img"), name="img")

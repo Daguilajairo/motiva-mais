@@ -1,6 +1,7 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
 
+
 const BASE_URL = "https://motiva-mais-3.onrender.com";
 
 function App() {
@@ -40,7 +41,7 @@ function App() {
   return (
     <main className="bg-gradient-to-b from-blue-100 to-purple-100 h-screen w-full flex flex-col items-center">
       <div className="mb-10 mt-10 flex flex-col items-center">
-        <h1 className="font-[Dancing Script] font-bold text-7xl">Motiva+</h1>
+        <h1 style={{ fontFamily: "'Dancing Script', cursive" }} className="font-bold text-7xl">Motiva+</h1>
         <p>Inspire-se e inspire outros</p>
       </div>
       <div className="bg-zinc-50 w-85 h-100 mt-4 rounded-xl shadow-lg p-6 flex flex-col pt-10">

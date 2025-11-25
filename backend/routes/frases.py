@@ -1,4 +1,4 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from database import frases_collection
 from datetime import datetime
@@ -14,7 +14,7 @@ class Frase(BaseModel):
 class CurtirRequest(BaseModel):
     usuario: str
 
-# Criar frase
+# ===== Criar frase =====
 @router.post("/frases")
 def criar_frase(frase: Frase):
     nova_frase = {
@@ -32,13 +32,13 @@ def criar_frase(frase: Frase):
             "texto": frase.texto,
             "hashtags": frase.hashtags,
             "autor": frase.autor,
-            "created_at": datetime.utcnow().isoformat(),
+            "created_at": nova_frase["created_at"].isoformat(),
             "curtidas": 0,
             "curtidoPor": []
         }
     }
 
-# Listar frases
+# ===== Listar frases =====
 @router.get("/frases")
 def listar_frases():
     frases_cursor = frases_collection.find().sort("created_at", -1)
@@ -55,13 +55,13 @@ def listar_frases():
         })
     return {"frases": frases}
 
-# Curtir frase
+# ===== Curtir frase =====
 @router.post("/frases/{frase_id}/curtir")
 def curtir_frase(frase_id: str, request: CurtirRequest):
     usuario = request.usuario
     frase = frases_collection.find_one({"_id": ObjectId(frase_id)})
     if not frase:
-        return {"msg": "Frase não encontrada"}
+        raise HTTPException(status_code=404, detail="Frase não encontrada")
 
     if usuario in frase.get("curtidoPor", []):
         frases_collection.update_one(
@@ -84,3 +84,19 @@ def curtir_frase(frase_id: str, request: CurtirRequest):
         "autor": frase_atualizada.get("autor"),
         "created_at": frase_atualizada.get("created_at").isoformat()
     }
+
+# ===== Deletar frase (somente autor) =====
+@router.delete("/frases/{frase_id}")
+def deletar_frase(frase_id: str, autor: str):
+    frase = frases_collection.find_one({"_id": ObjectId(frase_id)})
+    if not frase:
+        raise HTTPException(status_code=404, detail="Frase não encontrada")
+
+    if frase["autor"] != autor:
+        raise HTTPException(status_code=403, detail="Você não tem permissão para excluir esta frase")
+
+    resultado = frases_collection.delete_one({"_id": ObjectId(frase_id)})
+    if resultado.deleted_count == 0:
+        raise HTTPException(status_code=500, detail="Erro ao deletar a frase")
+
+    return {"msg": "Frase deletada com sucesso"}
