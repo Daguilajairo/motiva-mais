@@ -6,7 +6,7 @@ import axios from "axios";
 
 function Feed() {
   const location = useLocation();
-  const { novaFrase } = location.state || {}; // Pega nova frase se houver
+  const { novaFrase } = location.state || {};
 
   const [frases, setFrases] = useState([]);
   const [autorLogado, setAutorLogado] = useState(null);
@@ -14,19 +14,16 @@ function Feed() {
   useEffect(() => {
     const carregarFeed = async () => {
       try {
-        // Pega token
         const token = sessionStorage.getItem("token");
         if (!token) {
           window.location.href = "/";
           return;
         }
 
-        // Pega usuário do localStorage
         const usuarioStr = localStorage.getItem("usuario");
         const usuarioObj = usuarioStr ? JSON.parse(usuarioStr) : null;
         setAutorLogado(usuarioObj);
 
-        // Busca frases
         const res = await axios.get("https://motiva-mais-3.onrender.com/frases");
         setFrases(res.data.frases);
       } catch (error) {
@@ -37,7 +34,6 @@ function Feed() {
     carregarFeed();
   }, []);
 
-  // Se houver nova frase publicada, adiciona no início do feed
   useEffect(() => {
     if (novaFrase) {
       const timeout = setTimeout(() => {
@@ -48,17 +44,15 @@ function Feed() {
     }
   }, [novaFrase]);
 
-  // Função para curtir
   const handleCurtir = async (fraseId) => {
     try {
       await axios.post(`https://motiva-mais-3.onrender.com/frases/${fraseId}/curtir`);
-      setFrases(prev => prev.map(f => f._id === fraseId ? { ...f, curtidas: f.curtidas + 1 } : f));
+      setFrases(prev => prev.map(f => f._id === fraseId ? { ...f, curtidas: f.curtidas + 1, curtidoPor: [...(f.curtidoPor || []), autorLogado.nome] } : f));
     } catch (error) {
       console.error(error);
     }
   };
 
-  // Função para salvar
   const handleSalvar = async (fraseId) => {
     try {
       const usuario = autorLogado?.nome;
@@ -115,35 +109,13 @@ function Feed() {
               ))}
             </div>
 
-            {/* Botões Curtir e Salvar */}
-<div className="flex mt-4 gap-4 items-center">
-  {/* Curtir */}
-  <button
-    onClick={() => handleCurtir(frase._id)}
-    className="cursor-pointer"
-  >
-    <img
-      className="w-6 h-6"
-      src={frase.curtidoPor?.includes(autorLogado?.nome) ? "src/assets/img/icon-favorite-red.png" : "src/assets/img/icon-favorite.png"}
-      alt="Curtir"
-    />
-    <span className="ml-1 font-bold text-purple-500">{frase.curtidas || 0}</span>
-  </button>
-
-  {/* Salvar */}
-  <button
-    onClick={() => handleSalvar(frase._id)}
-    className="cursor-pointer"
-  >
-    <img
-      className="w-6 h-6"
-      src={frase.salvos?.includes(autorLogado?.nome) ? "src/assets/img/icon-save-yellow.png" : "src/assets/img/icon-save-ligth.png"}
-      alt="Salvar"
-    />
-  </button>
-</div>
-
-            <Estado />
+            {/* Componente Estado com curtidas e salvos */}
+            <Estado
+              frase={frase}
+              autorLogado={autorLogado}
+              onCurtir={() => handleCurtir(frase._id)}
+              onSalvar={() => handleSalvar(frase._id)}
+            />
           </div>
         ))
       )}
