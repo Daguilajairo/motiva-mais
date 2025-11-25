@@ -1,64 +1,133 @@
+import { Link } from "react-router-dom";
 import { useState } from "react";
-import axios from "axios";
 
 function Cadastro() {
   const [nome, setNome] = useState("");
+  const [dataNascimento, setDataNascimento] = useState("");
   const [senha, setSenha] = useState("");
-  const [fotoFile, setFotoFile] = useState(null);
+  const [confirmaSenha, setConfirmaSenha] = useState("");
+  const [fotoFile, setFotoFile] = useState(null); // Novo estado para foto
+  const [erro, setErro] = useState("");
+  const [sucesso, setSucesso] = useState("");
 
-  const handleSubmit = async (e) => {
+  const handleCadastro = async (e) => {
     e.preventDefault();
 
-    const formData = new FormData();
-    formData.append("nome", nome);
-    formData.append("senha", senha);
-    if (fotoFile) formData.append("file", fotoFile);
+    if (senha !== confirmaSenha) {
+      setErro("As senhas não conferem");
+      return;
+    }
 
     try {
-      const res = await axios.post(
-        "https://motiva-mais-3.onrender.com/registrar",
-        formData,
-        { headers: { "Content-Type": "multipart/form-data" } }
-      );
+      const formData = new FormData();
+      formData.append("nome", nome);
+      formData.append("senha", senha);
+      formData.append("dataNascimento", dataNascimento); // opcional, se quiser salvar
+      if (fotoFile) formData.append("file", fotoFile); // envia a foto
 
-      // Salva no localStorage
-      const usuario = { nome, foto: res.data.foto };
-      localStorage.setItem("usuario", JSON.stringify(usuario));
+      const response = await fetch("https://motiva-mais-3.onrender.com/registrar", {
+        method: "POST",
+        body: formData,
+      });
 
-      alert("Cadastro realizado com sucesso!");
-      window.location.href = "/login";
+      const result = await response.json();
 
+      if (response.ok) {
+        setSucesso("Usuário cadastrado com sucesso!");
+        setErro("");
+        setNome("");
+        setDataNascimento("");
+        setSenha("");
+        setConfirmaSenha("");
+        setFotoFile(null);
+
+        // Salvar no localStorage para usar a foto no feed
+        localStorage.setItem("usuario", JSON.stringify({
+          nome,
+          foto: result.foto || "/img/icon-avatar.png"
+        }));
+      } else {
+        setErro(result.msg || "Erro ao cadastrar usuário");
+      }
     } catch (err) {
       console.error(err);
-      alert(err.response?.data?.detail || "Erro ao cadastrar");
+      setErro("Erro ao conectar ao servidor");
     }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-4 w-80">
-      <input
-        type="text"
-        placeholder="Nome"
-        value={nome}
-        onChange={(e) => setNome(e.target.value)}
-        required
-      />
-      <input
-        type="password"
-        placeholder="Senha"
-        value={senha}
-        onChange={(e) => setSenha(e.target.value)}
-        required
-      />
-      <input
-        type="file"
-        accept="image/*"
-        onChange={(e) => setFotoFile(e.target.files[0])}
-      />
-      <button type="submit" className="bg-purple-500 text-white p-2 rounded">
-        Cadastrar
-      </button>
-    </form>
+    <main className="bg-gradient-to-b from-blue-100 to-purple-100 h-screen w-full flex flex-col items-center ">
+      <div className="mb-10 mt-2 flex flex-col items-center">
+        <h1 style={{ fontFamily: "Dancing Script" }} className="font-[Dancing Script] font-bold text-7xl">Motiva+</h1>
+        <p>Crie sua conta e comece a inspirar</p>
+      </div>
+
+      <div className="bg-zinc-50 w-85 h-auto rounded-xl shadow-lg p-6 flex flex-col pt-5">
+        <h1 className="font-bold text-2xl">Cadastro</h1>
+
+        <form className="flex flex-col mt-4 gap-1" onSubmit={handleCadastro}>
+          <label className="text-sm">Nome do usuário</label>
+          <input
+            type="text"
+            placeholder="Digite seu Login"
+            value={nome}
+            onChange={(e) => setNome(e.target.value)}
+            className="border text-sm border-zinc-300 rounded-md p-3 pl-2 mb-4 focus:border-purple-500 focus:outline-none transition-colors duration-300"
+            required
+          />
+
+          <label className="text-sm">Data Nascimento</label>
+          <input
+            type="date"
+            value={dataNascimento}
+            onChange={(e) => setDataNascimento(e.target.value)}
+            className="border text-sm border-zinc-300 rounded-md p-3 mb-4 pl-2 focus:border-purple-500 focus:outline-none transition-colors duration-300"
+          />
+
+          <label className="text-sm">Senha</label>
+          <input
+            type="password"
+            placeholder="********"
+            value={senha}
+            onChange={(e) => setSenha(e.target.value)}
+            className="border text-sm border-zinc-300 rounded-md p-3 mb-4 pl-2 focus:border-purple-500 focus:outline-none transition-colors duration-300"
+            required
+          />
+
+          <label className="text-sm">Confirmar Senha</label>
+          <input
+            type="password"
+            placeholder="********"
+            value={confirmaSenha}
+            onChange={(e) => setConfirmaSenha(e.target.value)}
+            className="border text-sm border-zinc-300 rounded-md p-3 mb-4 pl-2 focus:border-purple-500 focus:outline-none transition-colors duration-300"
+            required
+          />
+
+          <label className="text-sm">Foto de Perfil (opcional)</label>
+          <input
+            type="file"
+            accept="image/*"
+            onChange={(e) => setFotoFile(e.target.files[0])}
+            className="border text-sm border-zinc-300 rounded-md p-3 mb-4 pl-2 focus:border-purple-500 focus:outline-none transition-colors duration-300"
+          />
+
+          <button
+            type="submit"
+            className="bg-gradient-to-l from-blue-600 to-purple-500 text-white rounded-md p-3 hover:bg-gradient-to-l hover:from-blue-700 hover:to-purple-600 transition-colors hover:scale-105 transition-transform duration-300 cursor-pointer"
+          >
+            Cadastrar
+          </button>
+        </form>
+
+        {erro && <p className="text-red-500 mt-2">{erro}</p>}
+        {sucesso && <p className="text-green-500 mt-2">{sucesso}</p>}
+
+        <div className="mt-2 text-center text-base">
+          <p>Já tem conta? <Link to="/" className="text-purple-500 pl-1 inline-block hover:scale-105">Entre aqui</Link></p>
+        </div>
+      </div>
+    </main>
   );
 }
 
