@@ -13,44 +13,39 @@ function Cadastro() {
   const BASE_URL = "https://motiva-mais-3.onrender.com";
 
   const handleCadastro = async (e) => {
-  e.preventDefault();
+    e.preventDefault();
 
-  if (senha !== confirmaSenha) {
-    setErro("As senhas não conferem");
-    return;
-  }
-
-  try {
-    const res = await fetch(`${BASE_URL}/registrar`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({ nome, senha }) // somente o que o backend espera
-    });
-
-    const result = await res.json();
-
-    if (res.ok) {
-      setSucesso("Usuário cadastrado com sucesso!");
-      setErro("");
-
-      setNome("");
-      setSenha("");
-      setConfirmaSenha("");
-
-      const usuarioCadastrado = { nome, senha, foto: result.foto };
-      localStorage.setItem("usuario", JSON.stringify(usuarioCadastrado));
-
-      navigate("/feed");
-    } else {
-      setErro(result.detail || result.msg || "Erro ao cadastrar usuário");
+    if (senha !== confirmaSenha) {
+      setErro("As senhas não conferem");
+      return;
     }
-  } catch (err) {
-    console.error(err);
-    setErro("Erro ao conectar ao servidor");
-  }
-};
+
+    try {
+      const res = await fetch(`${BASE_URL}/registrar`, {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: new URLSearchParams({ nome, senha }).toString()
+      });
+
+      const result = await res.json();
+
+      if (res.ok) {
+        setSucesso("Usuário cadastrado com sucesso!");
+        setErro("");
+        setNome(""); setSenha(""); setConfirmaSenha("");
+
+        const usuarioCadastrado = { nome, foto: result.foto };
+        localStorage.setItem("usuario", JSON.stringify(usuarioCadastrado));
+
+        navigate("/feed");
+      } else {
+        setErro(result.detail || result.msg || "Erro ao cadastrar usuário");
+      }
+    } catch (err) {
+      console.error(err);
+      setErro("Erro ao conectar ao servidor");
+    }
+  };
 
   return (
     <main className="bg-gradient-to-b from-blue-100 to-purple-100 h-screen w-full flex flex-col items-center">
@@ -63,46 +58,14 @@ function Cadastro() {
         <h1 className="font-bold text-2xl">Cadastro</h1>
         <form className="flex flex-col mt-4 gap-1" onSubmit={handleCadastro}>
           <label className="text-sm">Nome do usuário</label>
-          <input
-            type="text"
-            placeholder="Digite seu Login"
-            value={nome}
-            onChange={(e) => setNome(e.target.value)}
-            className="border text-sm border-zinc-300 rounded-md p-3 pl-2 mb-4 focus:border-purple-500 focus:outline-none"
-          />
-
+          <input type="text" placeholder="Digite seu Login" value={nome} onChange={(e) => setNome(e.target.value)} className="border text-sm border-zinc-300 rounded-md p-3 pl-2 mb-4 focus:border-purple-500 focus:outline-none"/>
           <label className="text-sm">Data Nascimento</label>
-          <input
-            type="date"
-            value={dataNascimento}
-            onChange={(e) => setDataNascimento(e.target.value)}
-            className="border text-sm border-zinc-300 rounded-md p-3 mb-4 pl-2 focus:border-purple-500 focus:outline-none"
-          />
-
+          <input type="date" value={dataNascimento} onChange={(e) => setDataNascimento(e.target.value)} className="border text-sm border-zinc-300 rounded-md p-3 mb-4 pl-2 focus:border-purple-500 focus:outline-none"/>
           <label className="text-sm">Senha</label>
-          <input
-            type="password"
-            placeholder="********"
-            value={senha}
-            onChange={(e) => setSenha(e.target.value)}
-            className="border text-sm border-zinc-300 rounded-md p-3 mb-4 pl-2 focus:border-purple-500 focus:outline-none"
-          />
-
+          <input type="password" placeholder="********" value={senha} onChange={(e) => setSenha(e.target.value)} className="border text-sm border-zinc-300 rounded-md p-3 mb-4 pl-2 focus:border-purple-500 focus:outline-none"/>
           <label className="text-sm">Confirmar Senha</label>
-          <input
-            type="password"
-            placeholder="********"
-            value={confirmaSenha}
-            onChange={(e) => setConfirmaSenha(e.target.value)}
-            className="border text-sm border-zinc-300 rounded-md p-3 mb-4 pl-2 focus:border-purple-500 focus:outline-none"
-          />
-
-          <button
-            type="submit"
-            className="bg-gradient-to-l from-blue-600 to-purple-500 text-white rounded-md p-3 hover:scale-105 transition-transform"
-          >
-            Cadastrar
-          </button>
+          <input type="password" placeholder="********" value={confirmaSenha} onChange={(e) => setConfirmaSenha(e.target.value)} className="border text-sm border-zinc-300 rounded-md p-3 mb-4 pl-2 focus:border-purple-500 focus:outline-none"/>
+          <button type="submit" className="bg-gradient-to-l from-blue-600 to-purple-500 text-white rounded-md p-3 hover:scale-105 transition-transform">Cadastrar</button>
         </form>
 
         {erro && <p className="text-red-500 mt-2">{erro}</p>}
