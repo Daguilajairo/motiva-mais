@@ -46,53 +46,47 @@ function Feed() {
     return () => clearTimeout(timeout);
   }, [novaFrase]);
 
-  // Curtir frase
-  const handleCurtir = async (fraseId) => {
-    if (!autorLogado) return;
+ const handleCurtir = async (fraseId) => {
+  if (!autorLogado) return;
 
-    try {
-      const res = await axios.post(
-        `https://motiva-mais-3.onrender.com/frases/${fraseId}/curtir`,
-        { usuario: autorLogado.nome }
-      );
+  try {
+    const res = await axios.post(
+      `https://motiva-mais-3.onrender.com/frases/${fraseId}/curtir`,
+      { usuario: autorLogado.nome }
+    );
 
-      setFrases(prev =>
-        prev.map(f =>
-          f._id === fraseId
-            ? {
-                ...f,
-                curtidas: res.data.curtidas,
-                curtidoPor: res.data.curtidoPor
-              }
-            : f
-        )
-      );
-    } catch (error) {
-      console.error(error);
-    }
-  };
+    setFrases(prev =>
+      prev.map(f =>
+        f._id === fraseId
+          ? { ...f, curtidas: res.data.curtidas, curtidoPor: res.data.curtidoPor }
+          : f
+      )
+    );
+  } catch (error) {
+    console.error(error);
+  }
+};
 
-  // Salvar frase
-  const handleSalvar = async (fraseId) => {
-    if (!autorLogado) return;
+const handleSalvar = async (fraseId) => {
+  if (!autorLogado) return;
 
-    try {
-      const res = await axios.post(
-        `https://motiva-mais-3.onrender.com/frases/${fraseId}/salvar`,
-        { usuario: autorLogado.nome }
-      );
+  try {
+    const res = await axios.post(
+      `https://motiva-mais-3.onrender.com/frases/${fraseId}/salvar`,
+      { usuario: autorLogado.nome }
+    );
 
-      setFrases(prev =>
-        prev.map(f =>
-          f._id === fraseId
-            ? { ...f, salvos: res.data.salvos }
-            : f
-        )
-      );
-    } catch (error) {
-      console.error(error);
-    }
-  };
+    setFrases(prev =>
+      prev.map(f =>
+        f._id === fraseId
+          ? { ...f, salvos: res.data.salvos }
+          : f
+      )
+    );
+  } catch (error) {
+    console.error(error);
+  }
+};
 
   return (
     <section className="bg-gradient-to-b from-blue-100 to-purple-100 h-screen w-full flex flex-col items-center">
