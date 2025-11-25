@@ -17,8 +17,13 @@ async def registrar(
     login: str = Form(...),
     senha: str = Form(...)
 ):
-    if users_collection.find_one({"login": login}):
+    # Checa login
+    if users_collection.find_one({"login": login.lower()}):
         raise HTTPException(status_code=400, detail="Login já existe")
+
+    # Checa nome de perfil
+    if users_collection.find_one({"nome_perfil": nome_perfil}):
+        raise HTTPException(status_code=400, detail="Nome de perfil já existe. Escolha outro.")
 
     usuario_dict = {
         "nome_perfil": nome_perfil,
@@ -34,6 +39,7 @@ async def registrar(
         "id": str(result.inserted_id),
         "foto": usuario_dict["foto"]
     }
+
 
 # ===============================
 # Login de usuário
