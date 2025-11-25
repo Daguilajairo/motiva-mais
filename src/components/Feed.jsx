@@ -9,7 +9,7 @@ function Feed() {
   const { novaFrase } = location.state || {};
 
   const [frases, setFrases] = useState([]);
-  const [autorLogado, setAutorLogado] = useState(null);
+  const [usuarioLogado, setUsuarioLogado] = useState(null);
 
   // Carrega feed e usuário logado
   useEffect(() => {
@@ -23,7 +23,7 @@ function Feed() {
       const usuarioStr = localStorage.getItem("usuario");
       const usuarioObj = usuarioStr ? JSON.parse(usuarioStr) : null;
       if (!usuarioObj) return;
-      setAutorLogado(usuarioObj);
+      setUsuarioLogado(usuarioObj);
 
       try {
         const res = await axios.get("https://motiva-mais-3.onrender.com/frases");
@@ -47,11 +47,11 @@ function Feed() {
 
   // Curtir
   const handleCurtir = async (fraseId) => {
-    if (!autorLogado) return;
+    if (!usuarioLogado) return;
     try {
       const res = await axios.post(
         `https://motiva-mais-3.onrender.com/frases/${fraseId}/curtir`,
-        { usuario: autorLogado.nome }
+        { usuario: usuarioLogado.nome }
       );
       setFrases(prev =>
         prev.map(f => f._id === fraseId ? { ...f, ...res.data } : f)
@@ -63,11 +63,11 @@ function Feed() {
 
   // Salvar
   const handleSalvar = async (fraseId) => {
-    if (!autorLogado) return;
+    if (!usuarioLogado) return;
     try {
       const res = await axios.post(
         `https://motiva-mais-3.onrender.com/frases/${fraseId}/salvar`,
-        { usuario: autorLogado.nome }
+        { usuario: usuarioLogado.nome }
       );
       setFrases(prev =>
         prev.map(f => f._id === fraseId ? { ...f, ...res.data } : f)
@@ -77,9 +77,9 @@ function Feed() {
     }
   };
 
-  // Upload de avatar
+  // Upload de avatar direto no feed
   const handleAvatarChange = async (event) => {
-    if (!autorLogado) return;
+    if (!usuarioLogado) return;
     const file = event.target.files[0];
     if (!file) return;
 
@@ -88,14 +88,17 @@ function Feed() {
 
     try {
       const res = await axios.post(
-        `https://motiva-mais-3.onrender.com/usuarios/${autorLogado.nome}/upload-foto`,
+        `https://motiva-mais-3.onrender.com/usuarios/${usuarioLogado.nome}/upload-foto`,
         formData,
         { headers: { "Content-Type": "multipart/form-data" } }
       );
 
-      const usuarioAtualizado = { ...autorLogado, foto: res.data.foto_url };
-      setAutorLogado(usuarioAtualizado);
+      const usuarioAtualizado = { ...usuarioLogado, foto: res.data.foto_url };
+      setUsuarioLogado(usuarioAtualizado);
       localStorage.setItem("usuario", JSON.stringify(usuarioAtualizado));
+
+      // Atualiza fotos no feed também
+      setFrases(prev => prev.map(f => f.autor === usuarioAtualizado.nome ? { ...f, foto: usuarioAtualizado.foto } : f));
     } catch (err) {
       console.error("Erro ao enviar foto:", err);
     }
@@ -113,43 +116,46 @@ function Feed() {
           <h3 className="font-semibold text-lg">Nenhuma frase publicada ainda</h3>
         </div>
       ) : (
-        frases.map(frase => (
-          <div key={frase._id} className="bg-zinc-50 w-85 h-auto mt-4 rounded-xl shadow-lg p-6 flex flex-col pt-4">
+        frases.map(f => (
+          <div key={f._id} className="bg-zinc-50 w-85 h-auto mt-4 rounded-xl shadow-lg p-6 flex flex-col pt-4">
             <div className="flex gap-2 items-center">
-              <label htmlFor={`avatar-${frase._id}`}>
-               <img
-  className="w-12 h-12 rounded-full"
-  src={frase.autor === autorLogado?.nome ? autorLogado.foto : "/img/icon-avatar.png"}
-  alt="avatar"
-/>
-
+              {/* Avatar */}
+              <label htmlFor={`avatar-${f._id}`}>
+                <img
+                  className="w-12 h-12 hover:scale-110 cursor-pointer rounded-full"
+                  src={f.foto || "/img/icon-avatar.png"}
+                  alt="avatar"
+                />
               </label>
-              {frase.autor === autorLogado?.nome && (
+
+              {/* Se for o usuário logado, pode trocar a foto */}
+              {f.autor === usuarioLogado?.nome && (
                 <input
-                  id={`avatar-${frase._id}`}
+                  id={`avatar-${f._id}`}
                   type="file"
                   accept="image/*"
                   className="hidden"
                   onChange={handleAvatarChange}
                 />
               )}
+
               <div>
                 <h1 className="font-bold text-base">
-                  {frase.autor}{autorLogado && frase.autor === autorLogado.nome ? " (Você)" : ""}
+                  {f.autor}{usuarioLogado && f.autor === usuarioLogado.nome ? " (Você)" : ""}
                 </h1>
-                <p className="text-sm text-stone-500">{new Date(frase.created_at).toLocaleString()}</p>
+                <p className="text-sm text-stone-500">{new Date(f.created_at).toLocaleString()}</p>
               </div>
             </div>
 
-            <div className="mt-4"><p className="text-base">{frase.texto}</p></div>
+            <div className="mt-4"><p className="text-base">{f.texto}</p></div>
 
             <div className="flex mt-4 gap-2 text-purple-500">
-              {frase.hashtags.map((tag, i) => <p key={i}>#{tag}</p>)}
+              {f.hashtags.map((tag, i) => <p key={i}>#{tag}</p>)}
             </div>
 
             <Estado
-              frase={frase}
-              autorLogado={autorLogado}
+              frase={f}
+              autorLogado={usuarioLogado}
               onCurtir={handleCurtir}
               onSalvar={handleSalvar}
             />
