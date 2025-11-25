@@ -45,19 +45,21 @@ function Feed() {
   
   // NOVO: função para excluir fraseconsole.log("Excluindo frase:", fraseId);
 
-  const handleExcluir = async (fraseId) => {
-    if (!confirm("Tem certeza que deseja excluir esta frase?")) return;
-    try {
-      console.log("Excluindo frase:", fraseId);
+  const handleExcluir = async (fraseId, autor) => {
+  if (!confirm("Tem certeza que deseja excluir esta frase?")) return;
+  try {
+    console.log("Excluindo frase:", fraseId);
 
-      await axios.delete(`${BASE_URL}/frases/${fraseId}`);
-      // Remove do estado local para atualizar a tela
-      setFrases(prev => prev.filter(f => f._id !== fraseId));
-    } catch (err) {
-      console.error(err);
-      alert("Erro ao excluir a frase");
-    }
-  };
+    await axios.delete(`${BASE_URL}/frases/${fraseId}`, {
+      params: { autor } // <- envia o autor como query param
+    });
+
+    setFrases(prev => prev.filter(f => f._id !== fraseId));
+  } catch (err) {
+    console.error(err);
+    alert("Erro ao excluir a frase");
+  }
+};
 
   return (
     <section className="bg-gradient-to-b from-blue-100 to-purple-100 min-h-screen w-full flex flex-col items-center pb-5">
@@ -76,7 +78,7 @@ function Feed() {
             {/* Botão de exclusão só aparece para o autor */}
             {usuarioLogado?.nome === f.autor && (
               <button
-                onClick={() => handleExcluir(f._id)}
+                onClick={() => handleExcluir(f._id, f.autor)}
                 className="absolute top-2 right-2 text-red-500 hover:text-red-700"
                 title="Excluir frase"
               >
@@ -88,7 +90,7 @@ function Feed() {
               <h1 className="font-bold text-base">{f.autor}</h1>
               <p className="text-sm text-stone-500">{new Date(f.created_at).toLocaleString()}</p>
             </div>
-            <div className="mt-4"><p className="text-base">{f.texto}</p></div>
+            <div className="mt-4"><p className="text-base break-words whitespace-pre-wrap">{f.texto}</p></div>
             <div className="flex mt-4 gap-2 text-purple-500">{f.hashtags.map((tag,i)=><p key={i}>{tag}</p>)}</div>
             <Estado frase={f} autorLogado={usuarioLogado} onCurtir={handleCurtir} />
           </div>

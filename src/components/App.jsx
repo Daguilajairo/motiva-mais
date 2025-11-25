@@ -1,7 +1,6 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
 
-
 const BASE_URL = "https://motiva-mais-3.onrender.com";
 
 function App() {
@@ -12,10 +11,14 @@ function App() {
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    if (!login || !senha) { setErro("Preencha login e senha."); return; }
+
+    if (!login || !senha) { 
+      setErro("Preencha login e senha."); 
+      return; 
+    }
 
     const formData = new URLSearchParams();
-    formData.append("nome", login);
+    formData.append("login", login);   // <-- AGORA CERTO
     formData.append("senha", senha);
 
     try {
@@ -26,12 +29,19 @@ function App() {
       });
 
       const result = await response.json();
+
       if (response.ok) {
-        localStorage.setItem("usuario", JSON.stringify({ nome: login, token: result.token, foto: result.foto }));
+        localStorage.setItem("usuario", JSON.stringify({
+          nome_perfil: result.nome_perfil,   // <-- vindo do backend
+          token: result.token,
+          foto: result.foto
+        }));
+
         navigate("/feed");
       } else {
         setErro(result.detail || result.msg || "Usuário ou senha incorretos");
       }
+
     } catch (err) {
       console.error(err);
       setErro("Erro ao conectar ao servidor");
@@ -44,20 +54,46 @@ function App() {
         <h1 style={{ fontFamily: "'Dancing Script', cursive" }} className="font-bold text-7xl">Motiva+</h1>
         <p>Inspire-se e inspire outros</p>
       </div>
+
       <div className="bg-zinc-50 w-85 h-100 mt-4 rounded-xl shadow-lg p-6 flex flex-col pt-10">
         <h1 className="font-bold text-2xl">Entrar</h1>
+
         <form className="flex flex-col mt-4 gap-1" onSubmit={handleLogin}>
           <label className="text-sm">Login</label>
-          <input type="text" placeholder="Digite seu Login" value={login} onChange={e => setLogin(e.target.value)}
-            className="border text-sm border-zinc-300 rounded-md p-3 pl-2 mb-4 focus:border-purple-500 focus:outline-none"/>
+          <input 
+            type="text" 
+            placeholder="Digite seu Login" 
+            value={login} 
+            onChange={e => setLogin(e.target.value)}
+            className="border text-sm border-zinc-300 rounded-md p-3 pl-2 mb-4 focus:border-purple-500 focus:outline-none"
+          />
+
           <label className="text-sm">Senha</label>
-          <input type="password" placeholder="********" value={senha} onChange={e => setSenha(e.target.value)}
-            className="border text-sm border-zinc-300 rounded-md p-3 mb-4 pl-2 focus:border-purple-500 focus:outline-none"/>
-          <button type="submit" className="bg-gradient-to-l from-blue-600 to-purple-500 text-white rounded-md p-3 hover:scale-105 transition-transform">Entrar</button>
+          <input 
+            type="password" 
+            placeholder="********" 
+            value={senha} 
+            onChange={e => setSenha(e.target.value)}
+            className="border text-sm border-zinc-300 rounded-md p-3 mb-4 pl-2 focus:border-purple-500 focus:outline-none"
+          />
+
+          <button 
+            type="submit" 
+            className="bg-gradient-to-l from-blue-600 to-purple-500 text-white rounded-md p-3 hover:scale-105 transition-transform"
+          >
+            Entrar
+          </button>
         </form>
+
         {erro && <p className="text-red-500 mt-2">{erro}</p>}
+
         <div className="mt-6 text-center text-base">
-          <p>Não tem uma conta? <Link to="/cadastro" className="text-purple-500 pl-1 inline-block hover:scale-105 ">Cadastre-se</Link></p>
+          <p>
+            Não tem uma conta? 
+            <Link to="/cadastro" className="text-purple-500 pl-1 inline-block hover:scale-105">
+              Cadastre-se
+            </Link>
+          </p>
         </div>
       </div>
     </main>

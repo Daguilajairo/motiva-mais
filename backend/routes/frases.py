@@ -17,6 +17,21 @@ class CurtirRequest(BaseModel):
 # ===== Criar frase =====
 @router.post("/frases")
 def criar_frase(frase: Frase):
+
+    # 🔒 Limite de caracteres
+    if len(frase.texto) > 120:
+        raise HTTPException(
+            status_code=400,
+            detail="A frase deve ter no máximo 120 caracteres."
+        )
+
+    # 🔒 Limite de hashtags (máximo 3)
+    if len(frase.hashtags) > 3:
+        raise HTTPException(
+            status_code=400,
+            detail="Você pode adicionar no máximo 3 hashtags."
+        )
+
     nova_frase = {
         "texto": frase.texto,
         "hashtags": frase.hashtags,
@@ -25,7 +40,9 @@ def criar_frase(frase: Frase):
         "curtidas": 0,
         "curtidoPor": []
     }
+
     resultado = frases_collection.insert_one(nova_frase)
+
     return {
         "frase": {
             "_id": str(resultado.inserted_id),
@@ -37,6 +54,7 @@ def criar_frase(frase: Frase):
             "curtidoPor": []
         }
     }
+
 
 # ===== Listar frases =====
 @router.get("/frases")

@@ -9,22 +9,38 @@ BASE_URL = "https://motiva-mais-3.onrender.com"
 
 # Cadastro
 @router.post("/registrar")
-async def registrar(nome: str = Form(...), senha: str = Form(...)):
-    if users_collection.find_one({"nome": nome}):
-        raise HTTPException(status_code=400, detail="Usuário já existe")
+async def registrar(
+    nome_perfil: str = Form(...),
+    login: str = Form(...),
+    senha: str = Form(...)
+):
+    if users_collection.find_one({"login": login}):
+        raise HTTPException(status_code=400, detail="Login já existe")
 
-    usuario_dict = {"nome": nome, "senha": senha, "foto": f"{BASE_URL}/img/icon-avatar.png"}
+    usuario_dict = {
+        "nome_perfil": nome_perfil,
+        "login": login,
+        "senha": senha,
+        "foto": f"{BASE_URL}/img/icon-avatar.png"
+    }
+
     result = users_collection.insert_one(usuario_dict)
+
     return {
         "msg": "Usuário criado com sucesso",
         "id": str(result.inserted_id),
         "foto": usuario_dict["foto"]
     }
 
+
 # Login
 @router.post("/login")
-def login(nome: str = Form(...), senha: str = Form(...)):
-    usuario = users_collection.find_one({"nome": nome, "senha": senha})
+def login(
+    login: str = Form(...),
+    senha: str = Form(...)
+):
+    usuario = users_collection.find_one({"login": login, "senha": senha})
+
     if not usuario:
         raise HTTPException(status_code=401, detail="Usuário ou senha incorretos")
 
@@ -38,4 +54,10 @@ def login(nome: str = Form(...), senha: str = Form(...)):
         token = token.decode("utf-8")
 
     foto_url = usuario.get("foto", f"{BASE_URL}/img/icon-avatar.png")
-    return {"msg": "Login realizado com sucesso", "token": token, "foto": foto_url}
+
+    return {
+        "msg": "Login realizado com sucesso",
+        "token": token,
+        "foto": foto_url,
+        "nome_perfil": usuario.get("nome_perfil")
+    }
