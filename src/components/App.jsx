@@ -8,33 +8,40 @@ function App() {
   const navigate = useNavigate();
 
   const handleLogin = async (e) => {
-    e.preventDefault();
+  e.preventDefault();
 
-    const formData = new URLSearchParams();
-    formData.append("nome", login);
-    formData.append("senha", senha);
+  if (!login || !senha) {
+    setErro("Preencha login e senha.");
+    return;
+  }
 
-    try {
-        const response = await fetch("https://motiva-mais-3.onrender.com/login", {
-            method: "POST",
-            body: formData.toString(),
-            headers: { "Content-Type": "application/x-www-form-urlencoded" }
-        });
+  const formData = new URLSearchParams();
+  formData.append("nome", login);
+  formData.append("senha", senha);
 
-        const result = await response.json();
+  try {
+    const response = await fetch("https://motiva-mais-3.onrender.com/login", {
+      method: "POST",
+      body: formData // ⚡ envia direto, sem .toString() e sem header
+    });
 
-        if (response.ok) {
-            // Salva token e foto do usuário
-            localStorage.setItem("usuario", JSON.stringify({ nome: login, token: result.token, foto: result.foto }));
-            navigate("/feed");
-        } else {
-            setErro(result.detail || result.msg || "Erro no login: Verifique suas credenciais.");
-        }
-    } catch (err) {
-        console.error("Falha na rede ou na leitura da resposta:", err);
-        setErro("Erro ao conectar ao servidor.");
+    const result = await response.json();
+
+    if (response.ok) {
+      localStorage.setItem(
+        "usuario",
+        JSON.stringify({ nome: login, token: result.token, foto: result.foto })
+      );
+      navigate("/feed");
+    } else {
+      setErro(result.detail || result.msg || "Usuário ou senha incorretos.");
     }
-  };
+  } catch (err) {
+    console.error("Falha na rede ou na leitura da resposta:", err);
+    setErro("Erro ao conectar ao servidor. Verifique a URL da API ou se está online.");
+  }
+};
+
 
   return (
     <main className="bg-gradient-to-b from-blue-100 to-purple-100 h-screen w-full flex flex-col items-center">
