@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useLocation } from "react-router-dom";
 import Menu from "./Menu.jsx";
 import Estado from "./Estado.jsx";
@@ -10,6 +10,9 @@ function Feed() {
 
   const [frases, setFrases] = useState([]);
   const [autorLogado, setAutorLogado] = useState(null);
+  const [fotoPerfil, setFotoPerfil] = useState(null);
+
+  const inputFileRef = useRef(null);
 
   // Carrega feed e usuário logado
   useEffect(() => {
@@ -24,6 +27,10 @@ function Feed() {
       const usuarioObj = usuarioStr ? JSON.parse(usuarioStr) : null;
       setAutorLogado(usuarioObj);
 
+      // Carrega foto do perfil
+      const foto = localStorage.getItem("fotoPerfil");
+      if (foto) setFotoPerfil(foto);
+
       try {
         const res = await axios.get("https://motiva-mais-3.onrender.com/frases");
         setFrases(res.data.frases);
@@ -37,16 +44,28 @@ function Feed() {
 
   // Adiciona nova frase
   useEffect(() => {
-  if (!novaFrase) return;
+    if (!novaFrase) return;
+    const id = setTimeout(() => setFrases(prev => [novaFrase, ...prev]), 0);
+    return () => clearTimeout(id);
+  }, [novaFrase]);
 
-  // Coloca a atualização na fila do JS, evitando o warning
-  const id = setTimeout(() => {
-    setFrases(prev => [novaFrase, ...prev]);
-  }, 0);
+  // Escolher imagem do perfil
+  const handleAvatarClick = () => {
+    inputFileRef.current.click();
+  };
 
-  return () => clearTimeout(id);
-}, [novaFrase]);
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
 
+    const reader = new FileReader();
+    reader.onload = () => {
+      const base64 = reader.result;
+      setFotoPerfil(base64);
+      localStorage.setItem("fotoPerfil", base64);
+    };
+    reader.readAsDataURL(file);
+  };
 
   // Curtir
   const handleCurtir = async (fraseId) => {
@@ -94,10 +113,24 @@ function Feed() {
       ) : (
         frases.map(frase => (
           <div key={frase._id} className="bg-zinc-50 w-85 h-auto mt-4 rounded-xl shadow-lg p-6 flex flex-col pt-4">
-            <div className="flex gap-2">
-              <img className="w-12 h-12 hover:scale-110 cursor-pointer" src="/img/icon-avatar.png" alt="avatar" />
+            <div className="flex gap-2 items-center">
+              <img
+                className="w-12 h-12 hover:scale-110 cursor-pointer rounded-full"
+                src={fotoPerfil || "/img/icon-avatar.png"}
+                alt="avatar"
+                onClick={handleAvatarClick}
+              />
+              <input
+                type="file"
+                accept="image/*"
+                ref={inputFileRef}
+                className="hidden"
+                onChange={handleFileChange}
+              />
               <div>
-                <h1 className="font-bold text-base">{frase.autor}{autorLogado && frase.autor === autorLogado.nome ? " (Você)" : ""}</h1>
+                <h1 className="font-bold text-base">
+                  {frase.autor}{autorLogado && frase.autor === autorLogado.nome ? " (Você)" : ""}
+                </h1>
                 <p className="text-sm text-stone-500">{new Date(frase.created_at).toLocaleString()}</p>
               </div>
             </div>
