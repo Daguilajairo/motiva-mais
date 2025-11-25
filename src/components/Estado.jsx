@@ -1,18 +1,13 @@
 import React from "react";
 
-function Estado({ frase, autorLogado, onCurtir, onSalvar }) {
+function Estado({ frase, autorLogado, onCurtir }) {
   if (!autorLogado) return null;
 
   const autorNome = autorLogado.nome;
   const curtido = frase.curtidoPor?.includes(autorNome) || false;
-  const salvo = frase.salvos?.includes(autorNome) || false;
 
   const handleCurtirClick = async () => {
     await onCurtir(frase._id);
-  };
-
-  const handleSalvarClick = async () => {
-    await onSalvar(frase._id);
   };
 
   return (
@@ -26,15 +21,6 @@ function Estado({ frase, autorLogado, onCurtir, onSalvar }) {
             alt="Curtir"
           />
           <span className="font-bold text-purple-500">{frase.curtidas || 0}</span>
-        </button>
-
-        {/* Salvar */}
-        <button onClick={handleSalvarClick} className="cursor-pointer">
-          <img
-            className="w-5 h-5 hover:scale-110"
-            src={salvo ? "/img/icon-save-yellow.png" : "/img/icon-save-ligth.png"}
-            alt="Salvar"
-          />
         </button>
       </div>
     </div>

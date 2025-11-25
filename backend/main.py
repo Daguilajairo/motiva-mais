@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.staticfiles import StaticFiles  # <- serve arquivos estáticos
+from fastapi.staticfiles import StaticFiles
 from routes import users, frases
 
 app = FastAPI()
@@ -19,10 +19,10 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-# ============================
 
-# Serve arquivos da pasta "uploads" como estáticos
+# Serve arquivos estáticos (uploads, imagens padrão)
 app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
+app.mount("/img", StaticFiles(directory="img"), name="img")
 
 app.include_router(users.router, prefix="/")
 app.include_router(frases.router)

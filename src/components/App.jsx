@@ -7,7 +7,6 @@ function App() {
   const [erro, setErro] = useState("");
   const navigate = useNavigate();
 
-
   const handleLogin = async (e) => {
     e.preventDefault();
 
@@ -15,7 +14,6 @@ function App() {
 
     try {
       const response = await fetch("https://motiva-mais-3.onrender.com/login", {
-
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data)
@@ -24,13 +22,9 @@ function App() {
       const result = await response.json();
 
       if (response.ok) {
-        // Login OK, salvar token no sessionStorage
         sessionStorage.setItem("token", result.token);
-        ;
-        // SALVAR O NOME DO USUÁRIO NO LOCALSTORAGE
-    localStorage.setItem("usuario", JSON.stringify({ nome: login }));
-        // Redirecionar para Feed
-       navigate("/feed");
+        localStorage.setItem("usuario", JSON.stringify({ nome: login }));
+        navigate("/feed");
       } else {
         setErro(result.msg || "Erro no login");
       }

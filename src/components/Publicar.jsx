@@ -19,13 +19,9 @@ function Publicar() {
         autor
       });
 
-      // limpa formulário
       setTexto("");
       setHashtags("");
-
-      // redireciona para feed e passa a nova frase
       navigate("/feed", { state: { novaFrase: res.data.frase } });
-
     } catch (error) {
       console.error(error);
       alert("Erro ao publicar a frase");

@@ -7,7 +7,6 @@ function Header() {
 
     return (
         <>
-            
             <header className="w-full flex px-6 py-4 justify-between items-center border-2 border-blue-200 z-20 bg-white/50 backdrop-blur-md">
                 <h1 style={{ fontFamily: "Dancing Script" }} className="font-bold text-4xl text-purple-500">
                     Motiva+
@@ -19,7 +18,6 @@ function Header() {
                 />
             </header>
 
-            
             {menuOpen && (
                 <div
                     onClick={() => setMenuOpen(false)}
@@ -27,7 +25,6 @@ function Header() {
                 ></div>
             )}
 
-        
             <nav
                 className={`fixed top-0 right-0 h-70 w-64 bg-white shadow-xl z-20 p-6 transform transition-transform duration-300 rounded-xl ${
                     menuOpen ? "translate-x-0" : "translate-x-full"
@@ -38,40 +35,21 @@ function Header() {
                 <ul className="flex flex-col gap-6 text-lg">
                     <li
                         className="cursor-pointer hover:text-purple-500 hover:scale-110"
-                        onClick={() => {
-                            navigate("/feed");
-                            setMenuOpen(false);
-                        }}
+                        onClick={() => { navigate("/feed"); setMenuOpen(false); }}
                     >
                         📌 Feed
                     </li>
 
                     <li
                         className="cursor-pointer hover:text-purple-500 hover:scale-110"
-                        onClick={() => {
-                            navigate("/publicar");
-                            setMenuOpen(false);
-                        }}
+                        onClick={() => { navigate("/publicar"); setMenuOpen(false); }}
                     >
                         ✏️ Publicar
                     </li>
 
                     <li
                         className="cursor-pointer hover:text-purple-500 hover:scale-110"
-                        onClick={() => {
-                            navigate("/salvos");
-                            setMenuOpen(false);
-                        }}
-                    >
-                        ⭐ Salvos
-                    </li>
-
-                    <li
-                        className="cursor-pointer hover:text-purple-500 hover:scale-110"
-                        onClick={() => {
-                            navigate("/");
-                            setMenuOpen(false);
-                        }}
+                        onClick={() => { navigate("/"); setMenuOpen(false); }}
                     >
                         🚪 Sair
                     </li>

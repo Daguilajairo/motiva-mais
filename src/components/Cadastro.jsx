@@ -37,7 +37,6 @@ function Cadastro() {
         setSucesso("Usuário cadastrado com sucesso!");
         setErro("");
 
-        // Limpa o formulário
         setNome("");
         setDataNascimento("");
         setSenha("");
@@ -46,8 +45,7 @@ function Cadastro() {
         const usuarioCadastrado = { nome, dataNascimento, senha, foto: result.foto };
         localStorage.setItem("usuario", JSON.stringify(usuarioCadastrado));
 
-        // Vai para upload de foto opcional
-        navigate("/upload-foto", { state: { usuario: usuarioCadastrado } });
+        navigate("/feed");
       } else {
         setErro(result.detail || result.msg || "Erro ao cadastrar usuário");
       }
