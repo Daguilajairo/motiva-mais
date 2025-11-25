@@ -12,27 +12,32 @@ function App() {
 
     const data = { nome: login, senha };
 
-    try {
-      const response = await fetch("https://motiva-mais-3.onrender.com/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data)
-      });
+    // ... (código anterior)
 
-      const result = await response.json();
+ try {
+ const response = await fetch("https://motiva-mais-3.onrender.com/login", {
+ method: "POST",
+ headers: { "Content-Type": "application/json" },
+ body: JSON.stringify(data)
+ });
 
-      if (response.ok) {
-        sessionStorage.setItem("token", result.token);
-        localStorage.setItem("usuario", JSON.stringify({ nome: login }));
-        navigate("/feed");
-      } else {
-        setErro(result.msg || "Erro no login");
-      }
-    } catch (err) {
-      console.error(err);
-      setErro("Erro ao conectar ao servidor");
-    }
-  };
+ const result = await response.json();
+
+ if (response.ok) {
+ sessionStorage.setItem("token", result.token);
+localStorage.setItem("usuario", JSON.stringify({ nome: login }));
+navigate("/feed");
+} else {
+            // response.ok é FALSO para 422, 401, 404, etc.
+            // Aqui tratamos os erros que VEM do servidor.
+setErro(result.detail || result.msg || "Erro desconhecido. Verifique login/senha.");
+}
+ } catch (err) {
+ console.error("Falha na rede ou na leitura da resposta:", err);
+setErro("Erro ao conectar ao servidor ou processar resposta.");
+}
+ };
+// ...
 
   return (
     <>
