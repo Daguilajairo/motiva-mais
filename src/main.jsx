@@ -7,6 +7,7 @@ import Populares from './components/Populares.jsx'
 import Publicar from './components/Publicar.jsx'
 import Salvos from './components/Salvos.jsx'
 import Cadastro from './components/Cadastro.jsx'
+import UploadFoto from './components/UploadFoto.jsx'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
@@ -18,6 +19,8 @@ createRoot(document.getElementById('root')).render(
         <Route path="/populares" element={<Populares />} />
         <Route path="/publicar" element={<Publicar />} />
         <Route path="/salvos" element={<Salvos />} />
+        <Route path="/upload-foto" element={<UploadFoto />} />
+
       </Routes>
     </BrowserRouter>
   </StrictMode>
