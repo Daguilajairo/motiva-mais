@@ -12,6 +12,9 @@ class Frase(BaseModel):
     hashtags: list[str] = []
     autor: str
 
+class CurtirRequest(BaseModel):
+    usuario: str
+
 # POST: criar frase
 @router.post("/frases")
 def criar_frase(frase: Frase):
@@ -55,11 +58,18 @@ def listar_frases():
 
 # Curtir frase
 @router.post("/frases/{frase_id}/curtir")
-def curtir_frase(frase_id: str, usuario: str = Body(...)):
+# MUDANÇA AQUI: Receber o objeto 'request' do tipo CurtirRequest
+def curtir_frase(frase_id: str, request: CurtirRequest):
+    # MUDANÇA AQUI: Acessar o nome de usuário através do objeto 'request'
+    usuario = request.usuario
+    
     frase = frases_collection.find_one({"_id": ObjectId(frase_id)})
     if not frase:
+        # É uma boa prática retornar uma resposta HTTP de erro, não apenas um dicionário
+        # mas mantendo seu padrão:
         return {"msg": "Frase não encontrada"}
 
+    # O resto da lógica permanece o mesmo
     if usuario in frase.get("curtidoPor", []):
         frases_collection.update_one(
             {"_id": ObjectId(frase_id)},
@@ -72,8 +82,17 @@ def curtir_frase(frase_id: str, usuario: str = Body(...)):
         )
 
     frase_atualizada = frases_collection.find_one({"_id": ObjectId(frase_id)})
+    
+    # Adicione os campos de texto, autor e hashtags para o Feed.jsx ter a frase completa.
+    # O seu frontend (Feed.jsx) usa {...f, ...fraseAtualizada}, então só os campos
+    # atualizados (curtidas, curtidoPor) são estritamente necessários, mas é bom
+    # ter certeza de que o retorno é o que o frontend espera para a atualização.
     return {
         "_id": str(frase_atualizada["_id"]),
         "curtidas": frase_atualizada.get("curtidas", 0),
-        "curtidoPor": frase_atualizada.get("curtidoPor", [])
+        "curtidoPor": frase_atualizada.get("curtidoPor", []),
+        "texto": frase_atualizada.get("texto"),
+        "hashtags": frase_atualizada.get("hashtags"),
+        "autor": frase_atualizada.get("autor"),
+        "created_at": frase_atualizada.get("created_at").isoformat() # Adicionando campos da frase original
     }

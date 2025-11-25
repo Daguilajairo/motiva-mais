@@ -40,21 +40,25 @@ function Feed() {
   }, [novaFrase]);
 
  // Feed.jsx
+// Feed.jsx
 const handleCurtir = async (fraseId) => {
   if (!usuarioLogado) return;
 
   try {
+    // CORRETO: Envia o nome do usuário como um objeto JSON
     const res = await axios.post(`${BASE_URL}/frases/${fraseId}/curtir`, { usuario: usuarioLogado.nome });
-    const fraseAtualizada = res.data;
+    const fraseAtualizada = res.data; // Esta é a frase com os campos atualizados (curtidas, curtidoPor) E os originais (texto, autor, etc.)
 
     // Atualiza o feed globalmente
+    // Se o backend retorna a frase completa, este trecho está perfeito:
     setFrases(prev => prev.map(f => f._id === fraseId ? { ...f, ...fraseAtualizada } : f));
 
     return fraseAtualizada; // para o Estado.jsx atualizar localmente
   } catch (err) {
-    console.error(err);
+    console.error("Erro ao curtir frase:", err); // Log mais detalhado
   }
 };
+// ...
 
 
 
