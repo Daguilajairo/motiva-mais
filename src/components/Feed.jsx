@@ -9,21 +9,9 @@ function Feed() {
   const { novaFrase } = location.state || {};
 
   const [frases, setFrases] = useState([]);
-  const [_frasesSalvas, _setFrasesSalvas] = useState([]); // novas frases salvas
   const [autorLogado, setAutorLogado] = useState(null);
 
-  // Função para carregar frases salvas do usuário
-  const carregarSalvos = async () => {
-    if (!autorLogado) return;
-    try {
-      const res = await axios.get(`https://motiva-mais-3.onrender.com/salvos/${autorLogado.nome}`);
-      _setFrasesSalvas(res.data.frases);
-    } catch (err) {
-      console.error("Erro ao carregar frases salvas:", err);
-    }
-  };
-
-  // Carrega o feed e o usuário logado
+  // Carrega feed e usuário
   useEffect(() => {
     const carregarFeed = async () => {
       try {
@@ -39,35 +27,30 @@ function Feed() {
 
         const res = await axios.get("https://motiva-mais-3.onrender.com/frases");
         setFrases(res.data.frases);
-
-        // Carrega frases salvas do usuário
-        if (usuarioObj) {
-          carregarSalvos();
-        }
-
-      } catch (error) {
-        console.error("Erro ao buscar frases:", error);
+      } catch (err) {
+        console.error("Erro ao buscar frases:", err);
       }
     };
 
     carregarFeed();
   }, []);
 
-  // Adiciona nova frase se vier do state
-  useEffect(() => {
-    if (!novaFrase) return;
+  // Adiciona nova frase vindo de outra página
+ useEffect(() => {
+  if (!novaFrase) return;
 
-    const timeout = setTimeout(() => {
-      setFrases(prev => [novaFrase, ...prev]);
-    }, 0);
+  // Cria uma função assíncrona interna ou timeout para evitar render síncrono
+  const adicionarFrase = () => {
+    setFrases(prev => [novaFrase, ...prev]);
+  };
 
-    return () => clearTimeout(timeout);
-  }, [novaFrase]);
+  // Chamada imediata, mas agora não diretamente no corpo do useEffect
+  adicionarFrase();
+}, [novaFrase]);
 
   // Curtir frase
   const handleCurtir = async (fraseId) => {
     if (!autorLogado) return;
-
     try {
       const res = await axios.post(
         `https://motiva-mais-3.onrender.com/frases/${fraseId}/curtir`,
@@ -81,15 +64,14 @@ function Feed() {
             : f
         )
       );
-    } catch (error) {
-      console.error(error);
+    } catch (err) {
+      console.error(err);
     }
   };
 
   // Salvar frase
   const handleSalvar = async (fraseId) => {
     if (!autorLogado) return;
-
     try {
       const res = await axios.post(
         `https://motiva-mais-3.onrender.com/frases/${fraseId}/salvar`,
@@ -103,11 +85,8 @@ function Feed() {
             : f
         )
       );
-
-      // Atualiza lista de frases salvas
-      carregarSalvos();
-    } catch (error) {
-      console.error(error);
+    } catch (err) {
+      console.error(err);
     }
   };
 

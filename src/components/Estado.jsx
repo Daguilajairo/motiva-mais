@@ -1,22 +1,32 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 function Estado({ frase, autorLogado, onCurtir, onSalvar }) {
   const autorNome = autorLogado?.nome;
 
-  const [curtido, setCurtido] = useState(frase.curtidoPor?.includes(autorNome) || false);
-  const [salvo, setSalvo] = useState(frase.salvos?.includes(autorNome) || false);
-  const [numCurtidas, setNumCurtidas] = useState(frase.curtidas || 0);
+  const [curtido, setCurtido] = useState(false);
+  const [salvo, setSalvo] = useState(false);
+  const [numCurtidas, setNumCurtidas] = useState(0);
+
+  // Sincroniza estado com backend sempre que a frase mudar
+  useEffect(() => {
+    const atualizarEstado = () => {
+      setCurtido(frase.curtidoPor?.includes(autorNome) || false);
+      setSalvo(frase.salvos?.includes(autorNome) || false);
+      setNumCurtidas(frase.curtidas || 0);
+    };
+
+    atualizarEstado();
+  }, [frase, autorNome]);
 
   const handleCurtirClick = async () => {
-    setCurtido(prev => !prev); // ícone muda imediatamente
-    setNumCurtidas(prev => curtido ? prev - 1 : prev + 1); // contador muda imediatamente
-
-    await onCurtir(); // chama função do Feed.jsx que atualiza backend e array do feed
+    setCurtido(prev => !prev);
+    setNumCurtidas(prev => curtido ? prev - 1 : prev + 1);
+    await onCurtir();
   };
 
   const handleSalvarClick = async () => {
-    setSalvo(prev => !prev); // ícone muda imediatamente
-    await onSalvar(); // atualiza backend
+    setSalvo(prev => !prev);
+    await onSalvar();
   };
 
   return (
