@@ -41,16 +41,20 @@ function Feed() {
 
  const handleCurtir = async (fraseId) => {
   if (!usuarioLogado) return;
+
   try {
     const res = await axios.post(`${BASE_URL}/frases/${fraseId}/curtir`, { usuario: usuarioLogado.nome });
-    const fraseAtualizada = res.data; // _id, curtidas, curtidoPor
+    const fraseAtualizada = res.data;
 
-    // Atualiza o estado do feed
+    // Atualiza o estado do feed globalmente
     setFrases(prev => prev.map(f => f._id === fraseId ? { ...f, ...fraseAtualizada } : f));
-    
-    return fraseAtualizada; // retorna para Estado.jsx atualizar local
-  } catch (err) { console.error(err); }
+
+    return fraseAtualizada;
+  } catch (err) {
+    console.error(err);
+  }
 };
+
 
 
   return (

@@ -1,14 +1,25 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
 function Estado({ frase, autorLogado, onCurtir }) {
-  // hooks SEMPRE no topo
-  const [curtido, setCurtido] = useState(frase.curtidoPor?.includes(autorLogado?.nome) || false);
-  const [numCurtidas, setNumCurtidas] = useState(frase.curtidas || 0);
+  const [curtido, setCurtido] = useState(false);
+  const [numCurtidas, setNumCurtidas] = useState(0);
 
-  // se não tiver usuário logado, retorna null
+  // sincroniza estado local sempre que a frase ou o usuário mudarem
+  useEffect(() => {
+    if (!autorLogado) return;
+    // função para atualizar o estado de forma segura
+    const atualizarEstado = () => {
+      setCurtido(frase.curtidoPor?.includes(autorLogado.nome) || false);
+      setNumCurtidas(frase.curtidas || 0);
+    };
+    // chama dentro do efeito, evita setState direto na render
+    atualizarEstado();
+  }, [frase, autorLogado]);
+
   if (!autorLogado) return null;
 
   const handleCurtirClick = async () => {
+    if (!autorLogado) return;
     const res = await onCurtir(frase._id);
     if (res) {
       setCurtido(res.curtidoPor.includes(autorLogado.nome));
