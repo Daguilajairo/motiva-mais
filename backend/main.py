@@ -25,7 +25,9 @@ for directory in STATIC_DIRS:
 app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 app.mount("/img", StaticFiles(directory="img"), name="img")
 
-app.include_router(users.router, prefix="/")
+# ... (Seu código anterior para criar as pastas e configurar CORS) ...
+
+app.include_router(users.router, prefix="") # CORREÇÃO AQUI: Use prefixo vazio ""
 app.include_router(frases.router)
 
 @app.get("/")
