@@ -41,23 +41,34 @@ function Feed() {
 
  // Feed.jsx
 // Feed.jsx
+// ...
 const handleCurtir = async (fraseId) => {
-  if (!usuarioLogado) return;
+  if (!usuarioLogado) {
+    console.log("Usuário não logado, abortando curtir.");
+    return; // Retorna undefined
+  }
 
   try {
-    // CORRETO: Envia o nome do usuário como um objeto JSON
     const res = await axios.post(`${BASE_URL}/frases/${fraseId}/curtir`, { usuario: usuarioLogado.nome });
-    const fraseAtualizada = res.data; // Esta é a frase com os campos atualizados (curtidas, curtidoPor) E os originais (texto, autor, etc.)
+    const fraseAtualizada = res.data;
 
-    // Atualiza o feed globalmente
-    // Se o backend retorna a frase completa, este trecho está perfeito:
-    setFrases(prev => prev.map(f => f._id === fraseId ? { ...f, ...fraseAtualizada } : f));
+    // LOG DE DEBUG ESSENCIAL: O QUE O BACKEND RESPONDEU
+    console.log("Resposta do Backend (fraseAtualizada):", fraseAtualizada); 
 
-    return fraseAtualizada; // para o Estado.jsx atualizar localmente
+    if (fraseAtualizada) {
+        // Atualiza o feed globalmente
+        setFrases(prev => prev.map(f => f._id === fraseId ? { ...f, ...fraseAtualizada } : f));
+    }
+    
+    return fraseAtualizada; // Retorna a frase para o Estado.jsx
+
   } catch (err) {
-    console.error("Erro ao curtir frase:", err); // Log mais detalhado
+    // ESTE É O LOG MAIS IMPORTANTE: SE O BOTÃO NÃO FAZ NADA, HÁ UM ERRO NO BACKEND/REDE
+    console.error("ERRO COMPLETO AO CURTIR FRASE:", err); 
+    return null; // Garante que Estado.jsx não tentará usar um erro
   }
 };
+// ...
 // ...
 
 
