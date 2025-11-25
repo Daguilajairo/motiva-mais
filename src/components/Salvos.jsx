@@ -1,16 +1,19 @@
 import { useState, useEffect } from "react";
 import Menu from "./Menu.jsx";
+import Estado from "./Estado.jsx";
 import axios from "axios";
 
 function Salvos() {
   const [frasesSalvas, setFrasesSalvas] = useState([]);
   const [usuarioLogado, setUsuarioLogado] = useState(null);
 
+  // Carrega frases salvas e usuário logado
   useEffect(() => {
     const carregarSalvos = async () => {
       const usuarioStr = localStorage.getItem("usuario");
       const usuarioObj = usuarioStr ? JSON.parse(usuarioStr) : null;
       if (!usuarioObj) return;
+
       setUsuarioLogado(usuarioObj);
 
       try {
@@ -18,20 +21,23 @@ function Salvos() {
         const salvosDoUsuario = res.data.frases.filter(f => f.salvos?.includes(usuarioObj.nome));
         setFrasesSalvas(salvosDoUsuario);
       } catch (err) {
-        console.error(err);
+        console.error("Erro ao buscar frases salvas:", err);
       }
     };
 
     carregarSalvos();
   }, []);
 
+  // Remove frase dos salvos
   const handleRemover = async (fraseId) => {
     if (!usuarioLogado) return;
+
     try {
       await axios.post(
         `https://motiva-mais-3.onrender.com/frases/${fraseId}/salvar`,
         { usuario: usuarioLogado.nome }
       );
+
       setFrasesSalvas(prev => prev.filter(f => f._id !== fraseId));
     } catch (err) {
       console.error(err);
@@ -57,10 +63,19 @@ function Salvos() {
       ) : (
         frasesSalvas.map(f => (
           <div key={f._id} className="bg-zinc-50 w-85 h-auto mt-4 rounded-xl shadow-lg p-6 flex flex-col pt-4">
-            <div className="flex gap-2">
-              <img className="w-12 h-12 hover:scale-110 cursor-pointer" src="/img/icon-avatar.png" alt="avatar" />
+            <div className="flex gap-2 items-center">
+              <img
+                className="w-12 h-12 hover:scale-110 cursor-pointer rounded-full"
+                src={f.autor === usuarioLogado?.nome && usuarioLogado?.foto
+                  ? usuarioLogado.foto
+                  : "/img/icon-avatar.png"
+                }
+                alt="avatar"
+              />
               <div>
-                <h1 className="font-bold text-base">{f.autor}</h1>
+                <h1 className="font-bold text-base">
+                  {f.autor}{usuarioLogado && f.autor === usuarioLogado.nome ? " (Você)" : ""}
+                </h1>
                 <p className="text-sm text-stone-500">{new Date(f.created_at).toLocaleString()}</p>
               </div>
             </div>
@@ -77,6 +92,13 @@ function Salvos() {
                 <span className="font-bold text-purple-500">Remover</span>
               </button>
             </div>
+
+            <Estado
+              frase={f}
+              autorLogado={usuarioLogado}
+              onCurtir={async () => { /* implementar se quiser curtir daqui */ }}
+              onSalvar={async () => { /* implementar se quiser salvar daqui */ }}
+            />
           </div>
         ))
       )}

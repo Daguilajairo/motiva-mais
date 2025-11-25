@@ -77,7 +77,7 @@ function Feed() {
     }
   };
 
-  // === NOVO: Upload de avatar ===
+  // Upload de avatar
   const handleAvatarChange = async (event) => {
     if (!autorLogado) return;
     const file = event.target.files[0];
@@ -93,11 +93,9 @@ function Feed() {
         { headers: { "Content-Type": "multipart/form-data" } }
       );
 
-      // Atualiza o objeto do usuário local
       const usuarioAtualizado = { ...autorLogado, foto: res.data.foto_url };
       setAutorLogado(usuarioAtualizado);
       localStorage.setItem("usuario", JSON.stringify(usuarioAtualizado));
-
     } catch (err) {
       console.error("Erro ao enviar foto:", err);
     }

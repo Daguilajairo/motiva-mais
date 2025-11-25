@@ -1,11 +1,7 @@
-from fastapi import FastAPI, UploadFile, File, HTTPException
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
-import os
-import shutil
-
-from routes import users
-from routes import frases
+from fastapi.staticfiles import StaticFiles  # <- serve arquivos estáticos
+from routes import users, frases
 
 app = FastAPI()
 
@@ -25,29 +21,12 @@ app.add_middleware(
 )
 # ============================
 
+# Serve arquivos da pasta "uploads" como estáticos
+app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
+
 app.include_router(users.router, prefix="/")
 app.include_router(frases.router)
 
 @app.get("/")
 def home():
     return {"msg": "API Motiva+ rodando"}
-
-# === UPLOAD DE FOTO ===
-UPLOAD_DIR = "uploads"
-os.makedirs(UPLOAD_DIR, exist_ok=True)
-
-@app.post("/usuarios/{usuario_nome}/upload-foto")
-async def upload_foto(usuario_nome: str, file: UploadFile = File(...)):
-    # Verifica se é imagem
-    if not file.content_type.startswith("image/"):
-        raise HTTPException(status_code=400, detail="Arquivo precisa ser uma imagem")
-    
-    # Gera caminho único
-    caminho = os.path.join(UPLOAD_DIR, f"{usuario_nome}_{file.filename}")
-    
-    # Salva no servidor
-    with open(caminho, "wb") as buffer:
-        shutil.copyfileobj(file.file, buffer)
-    
-    # Retorna o caminho para salvar no Mongo
-    return JSONResponse(content={"foto_url": f"/{caminho}"})

@@ -11,27 +11,18 @@ import shutil
 router = APIRouter()
 SECRET_KEY = "minha_chave_secreta"
 
-# Diretório onde as fotos serão salvas
 UPLOAD_DIR = "uploads"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
-# Modelo para receber os dados do usuário
 class UserCreate(BaseModel):
     nome: str
     senha: str
 
-# Rota de teste
-@router.get("/teste-usuario")
-def teste_usuario():
-    return {"msg": "Rota de usuário funcionando", "usuarios": users_collection.count_documents({})}
-
-# Rota de cadastro
 @router.post("/registrar")
 def registrar(user: UserCreate):
     result = users_collection.insert_one(user.dict())
     return {"msg": "Usuário criado com sucesso", "id": str(result.inserted_id)}
 
-# Rota de login
 @router.post("/login")
 def login(user: UserCreate):
     usuario = users_collection.find_one({"nome": user.nome, "senha": user.senha})
@@ -47,23 +38,22 @@ def login(user: UserCreate):
     if isinstance(token, bytes):
         token = token.decode("utf-8")
 
-    return {"msg": "Login realizado com sucesso", "token": token}
+    # Retorna também a URL da foto caso exista
+    foto_url = usuario.get("foto", "/img/icon-avatar.png")
 
-# === NOVA ROTA: UPLOAD DE FOTO ===
+    return {"msg": "Login realizado com sucesso", "token": token, "foto": foto_url}
+
+# === UPLOAD DE FOTO ===
 @router.post("/usuarios/{usuario_nome}/upload-foto")
 async def upload_foto(usuario_nome: str, file: UploadFile = File(...)):
-    # Verifica se o arquivo é imagem
     if not file.content_type.startswith("image/"):
         raise HTTPException(status_code=400, detail="Arquivo precisa ser uma imagem")
     
-    # Gera caminho único
     caminho = os.path.join(UPLOAD_DIR, f"{usuario_nome}_{file.filename}")
     
-    # Salva a foto no servidor
     with open(caminho, "wb") as buffer:
         shutil.copyfileobj(file.file, buffer)
     
-    # Salva o caminho da foto no Mongo
     users_collection.update_one(
         {"nome": usuario_nome},
         {"$set": {"foto": f"/{caminho}"}}
