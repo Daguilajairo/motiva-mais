@@ -1,16 +1,48 @@
-# React + Vite
+🚀 Construí minha própria rede social: Motiva+ 💡
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Hoje quero compartilhar um projeto especial que desenvolvi recentemente: uma mini rede social chamada Motiva+, focada em frases motivacionais, curtidas, salvamentos e interação entre usuários.
 
-Currently, two official plugins are available:
+Esse projeto surgiu como um desafio pessoal para evoluir como dev — principalmente unindo frontend + backend + autenticação + banco de dados. E posso dizer: aprendi MUITO! 🙌
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+🛠️ Tecnologias utilizadas
+🔹 Frontend:
+React
+React Router
+Axios
+Hooks (useState, useEffect, useLocation)
+Componentização e estado global simples
+TailwindCSS (ou CSS tradicional, caso queira ajustar)
 
-## React Compiler
+🔹 Backend (API):
+FastAPI (Python)
+Rotas REST (Registrar, Login, Feed, Curtir, Salvar, Buscar frases…)
+Autenticação com JWT (JSON Web Token)
+Criptografia de senha com bcrypt
+Middlewares e validações
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+🔹 Banco de Dados:
+MongoDB Atlas
+Collections: users, frases, curtidas, salvos
+Armazenamento de frases, usuários e relacionamentos
 
-## Expanding the ESLint configuration
+🔹 Deploy:
+Backend hospedado no Render
+Frontend hospedado no Vercel
+💡 O que aprendi durante o desenvolvimento?
+✔ Como estruturar e consumir APIs reais no frontend
+ ✔ Como implementar autenticação segura com JWT
+ ✔ Como organizar estados em componentes React
+ ✔ Como conectar o frontend ao backend em produção
+ ✔ Como lidar com banco de dados não relacional
+ ✔ Como debugar, testar e versionar etapas do sistema
+ ✔ E principalmente: como transformar uma ideia em um produto funcional
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+🎯 Objetivo do Motiva+
+Criar um espaço simples onde os usuários possam:
+ ✨ Ler frases motivacionais
+ ❤️ Curtir
+ 📌 Salvar
+ 📝 Criar suas próprias frases
+ 👀 Visualizar atualizações de outros usuários
+
+Um ambiente leve que ajuda a espalhar motivação — e ao mesmo tempo serve como um laboratório perfeito para eu testar e aprimorar minhas habilidades em desenvolvimento web.
